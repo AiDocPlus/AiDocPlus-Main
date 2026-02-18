@@ -8,7 +8,7 @@ MAIN_DIR="$(dirname "$SCRIPT_DIR")"
 PARENT_DIR="$(dirname "$MAIN_DIR")"
 TARGET_DIR="${PARENT_DIR}/AiDocPlus"
 
-echo "📦 Deploying AiDocPlus-Main → ${TARGET_DIR}"
+echo "[deploy] AiDocPlus-Main -> ${TARGET_DIR}"
 
 # 确保目标目录存在
 mkdir -p "${TARGET_DIR}"
@@ -33,4 +33,4 @@ rsync -av --delete \
 # 确保 generated 目录存在（各资源仓库 deploy 写入）
 mkdir -p "${TARGET_DIR}/packages/shared-types/src/generated"
 
-echo "✅ AiDocPlus-Main deployed successfully"
+echo "[done] AiDocPlus-Main deployed successfully"
