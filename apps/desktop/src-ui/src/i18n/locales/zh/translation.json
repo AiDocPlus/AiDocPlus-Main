@@ -1,0 +1,1713 @@
+{
+  "app": {
+    "name": "AI 文档编辑器",
+    "title": "AiDocPlus",
+    "description": "基于 AI 的智能文档创作工具"
+  },
+  "menu": {
+    "file": "文件",
+    "edit": "编辑",
+    "view": "视图",
+    "help": "帮助",
+    "settings": "设置",
+    "exportProject": "导出项目",
+    "exportProjectZip": "导出项目为 ZIP",
+    "zipFilter": "ZIP 压缩包",
+    "exportedTo": "项目已导出到:\n{{path}}",
+    "exportSuccess": "导出成功",
+    "exportFailed": "导出失败: {{error}}",
+    "exportError": "导出错误",
+    "importProjectZip": "导入项目 (ZIP)",
+    "importSuccess": "项目 \"{{name}}\" 导入成功",
+    "importSuccessTitle": "导入成功",
+    "importFailed": "导入失败: {{error}}",
+    "importError": "导入错误",
+    "backupProject": "备份项目",
+    "backedUpTo": "项目已备份到:\n{{path}}",
+    "backupSuccess": "备份成功",
+    "backupFailed": "备份失败: {{error}}",
+    "backupError": "备份错误",
+    "renameProject": "重命名项目",
+    "renameProjectPrompt": "请输入新的项目名称：",
+    "projectRenamed": "项目已重命名为 \"{{name}}\"",
+    "renameSuccess": "重命名成功",
+    "renameFailed": "重命名失败: {{error}}",
+    "renameError": "重命名错误",
+    "deleteProject": "删除项目",
+    "deleteProjectConfirm": "确定要删除项目 \"{{name}}\" 吗？\n\n此操作将删除项目及其所有文档，且不可恢复。",
+    "deleteLabel": "删除",
+    "cancelLabel": "取消",
+    "projectDeleted": "项目已删除",
+    "deleteSuccess": "删除成功",
+    "deleteFailed": "删除失败: {{error}}",
+    "deleteError": "删除错误",
+    "renameDocument": "重命名文档",
+    "renameDocPrompt": "请输入新的文档标题：",
+    "docRenamed": "文档已重命名为 \"{{title}}\"",
+    "docRenameFailed": "重命名失败: {{error}}",
+    "deleteDocument": "删除文档",
+    "deleteDocConfirm": "确定要删除文档 \"{{title}}\" 吗？此操作不可恢复。",
+    "docDeleted": "文档已删除",
+    "docDeleteFailed": "删除失败: {{error}}",
+    "openProjectFirst": "请先打开一个项目",
+    "openDocFirst": "请先打开一个文档",
+    "duplicateDocument": "复制文档",
+    "duplicateSuffix": "(副本)",
+    "duplicateFailed": "复制失败: {{error}}",
+    "duplicateError": "复制错误"
+  },
+  "store": {
+    "exportProjectFailed": "导出项目失败",
+    "importProjectFailed": "导入项目失败",
+    "moveDocFailed": "移动文档失败",
+    "copyDocFailed": "复制文档失败",
+    "contextMaterial": "素材内容",
+    "contextPrompt": "提示词",
+    "contextGenerated": "AI 生成的正文内容",
+    "contextDefault": "文档内容",
+    "contextUserLabel": "以下是用户的{{label}}："
+  },
+  "common": {
+    "save": "保存",
+    "saveAndClose": "保存并关闭",
+    "cancel": "取消",
+    "delete": "删除",
+    "rename": "重命名",
+    "create": "创建",
+    "edit": "编辑",
+    "search": "搜索",
+    "export": "导出",
+    "import": "导入",
+    "confirm": "确认",
+    "close": "关闭",
+    "loading": "加载中...",
+    "noContent": "暂无内容",
+    "unsavedChanges": "未保存的更改",
+    "error": "错误",
+    "success": "成功",
+    "warning": "警告",
+    "info": "信息",
+    "yes": "是",
+    "no": "否",
+    "ok": "确定",
+    "apply": "应用",
+    "reset": "重置",
+    "default": "默认",
+    "custom": "自定义",
+    "name": "名称",
+    "title": "标题",
+    "description": "描述",
+    "content": "内容",
+    "author": "作者",
+    "createdAt": "创建时间",
+    "updatedAt": "更新时间",
+    "actions": "操作",
+    "select": "选择",
+    "selectAll": "全选",
+    "clear": "清除",
+    "clearSelection": "取消选择",
+    "refresh": "刷新",
+    "back": "返回",
+    "next": "下一步",
+    "previous": "上一步",
+    "finish": "完成",
+    "copy": "副本",
+    "send": "发送"
+  },
+  "fileTree": {
+    "title": "文件",
+    "sidebarTitle": "项目 - 文档",
+    "newProject": "新建项目",
+    "newDocument": "新建文档",
+    "deleteProject": "删除项目",
+    "renameProject": "重命名项目",
+    "duplicateDocument": "复制文档",
+    "deleteDocument": "删除文档",
+    "renameDocument": "重命名文档",
+    "openProject": "打开项目",
+    "closeProject": "关闭项目",
+    "projectCount": "{{count}} 个项目",
+    "documentCount": "{{count}} 个文档",
+    "noProjects": "暂无项目",
+    "noDocuments": "暂无文档",
+    "confirmDeleteProject": "确定要删除项目「{{name}}」吗？此操作不可撤销。",
+    "batchExport": "导出选中",
+    "batchDelete": "删除选中",
+    "selectedCount": "已选择 {{count}} 个",
+    "confirmDeleteDocument": "确定要删除文档「{{title}}」吗？此操作不可撤销。",
+    "projectCreated": "项目已创建",
+    "documentCreated": "文档已创建",
+    "projectDeleted": "项目已删除",
+    "documentDeleted": "文档已删除",
+    "documentRenamed": "文档已重命名",
+    "batchDeleteConfirm": "删除 {{count}} 个选中的文档？",
+    "sort": "排序",
+    "sortByName": "按名称",
+    "sortByCreated": "按创建时间",
+    "sortByUpdated": "按更新时间",
+    "createProject": "新建项目",
+    "needProjectForImport": "请先打开一个项目再导入文件",
+    "noMarkdownFiles": "未找到 Markdown 文件，请拖入 .md 或 .markdown 文件。",
+    "importSuccess": "成功导入 {{count}} 个文件",
+    "importError": "导入文件失败",
+    "dropToImport": "拖放 Markdown 文件以导入",
+    "importing": "正在导入文件...",
+    "selectExportFolder": "选择导出文件夹",
+    "exportSuccess": "成功导出 {{count}} 个文档",
+    "expandAll": "展开全部",
+    "collapseAll": "折叠全部",
+    "sortCustom": "自定义（拖动）",
+    "newFromTemplate": "从模板新建",
+    "description": "Description"
+  },
+  "editor": {
+    "originalContent": "素材内容",
+    "aiGeneratedContent": "正文内容",
+    "originalContentPlaceholder": "在此输入素材内容... (支持 Markdown)",
+    "aiContentPlaceholder": "正文内容将出现在这里...",
+    "save": "保存文档",
+    "export": "导出文档",
+    "autoSave": "自动保存",
+    "autoSaving": "自动保存中...",
+    "saved": "已保存",
+    "newDocument": "新建文档",
+    "enterTitle": "请输入文档标题",
+    "startWriting": "开始写作...",
+    "wordCount": "{{count}} 字",
+    "charCount": "{{count}} 字符",
+    "lineCount": "{{count}} 行",
+    "exportAsMarkdown": "导出为 Markdown",
+    "exportAsHTML": "导出为 HTML",
+    "exportAsText": "导出为纯文本",
+    "exportSuccess": "导出成功",
+    "newDocumentInProject": "新建文档",
+    "deleteCurrentDocument": "删除当前文档",
+    "untitledDocument": "未命名文档",
+    "versionHistory": "版本历史",
+    "layoutHorizontal": "切换为左右布局",
+    "layoutVertical": "切换为上下布局",
+    "saveCurrent": "保存当前文档",
+    "saveAll": "保存全部文档",
+    "closeAI": "关闭 AI 助手",
+    "openAI": "打开 AI 助手",
+    "splitVertical": "垂直分割",
+    "splitHorizontal": "水平分割",
+    "noDocument": "未选择文档",
+    "selectDocument": "请从左侧选择一个文档开始编辑",
+    "goToTop": "滚动到顶部",
+    "goToBottom": "滚动到底部",
+    "exportContent": "导出正文",
+    "exportAndOpen": "导出并用外部程序打开",
+    "exportAsMd": "导出为 Markdown (.md)",
+    "exportAsHtml": "导出为 HTML (.html)",
+    "exportAsDocx": "导出为 Word (.docx)",
+    "exportAsPdf": "导出为 PDF (.pdf)",
+    "exportAsTxt": "导出为纯文本 (.txt)",
+    "exportComposed": "导出合并内容",
+    "composedMd": "合并内容 → Markdown",
+    "composedHtml": "合并内容 → HTML",
+    "composedDocx": "合并内容 → Word",
+    "composedPdf": "合并内容 → PDF",
+    "exportPdfHint": "已在浏览器中打开公文格式文档，请使用浏览器的\"打印\"功能，选择\"另存为 PDF\"即可导出。\n\n文件位置: {{path}}",
+    "exportPdfTitle": "导出为 PDF",
+    "exportSuccessMsg": "导出成功: {{path}}",
+    "exportSuccessTitle": "导出成功",
+    "exportErrorTitle": "导出错误",
+    "exportFailedMsg": "导出失败: {{error}}",
+    "exportOpenFailed": "导出并打开失败: {{error}}",
+    "contentArea": "正文区",
+    "composerArea": "合并区",
+    "newBlankDocument": "新建空白文档",
+    "newFromTemplate": "从模板新建",
+    "saveAsTemplate": "存为模板",
+    "wordOpenWps": "Word → WPS 打开",
+    "wordOpenWord": "Word → Word 打开",
+    "htmlOpenEdge": "HTML → Edge 打开",
+    "htmlOpenChrome": "HTML → Chrome 打开",
+    "htmlOpenSafari": "HTML → Safari 打开",
+    "mdOpenDefault": "Markdown → 默认程序打开",
+    "wordOpenDefault": "Word → 默认程序打开",
+    "htmlOpenDefault": "HTML → 默认浏览器打开",
+    "positionAbove": "(上方)",
+    "positionRight": "(右侧)",
+    "positionBelow": "(下方)",
+    "positionLeft": "(左侧)",
+    "maximize": "最大化",
+    "restore": "恢复",
+    "minimize": "最小化",
+    "composedSuffix": "_合并",
+    "aiSuffix": "_AI",
+    "attachment": {
+      "title": "附件",
+      "titleCount": "附件 ({{count}})",
+      "add": "添加",
+      "noAttachments": "暂无附件，点击\"添加\"选择文件",
+      "previewContent": "预览内容",
+      "removeAttachment": "移除附件",
+      "converting": "正在转换...",
+      "contentTruncated": "\n\n... (内容过长，仅显示前 2000 字符)"
+    },
+    "composer": {
+      "exitMaximize": "退出最大化",
+      "maximize": "最大化",
+      "placeholder": "在此合并文档内容…可从工具栏的导入按钮导入正文、插件或文件内容，也可直接编辑。"
+    },
+    "outline": {
+      "title": "大纲",
+      "titleCount": "大纲 ({{count}})",
+      "noHeadings": "暂无标题"
+    },
+    "statusBar": {
+      "stats": "{{lines}} 行 · {{words}} 词 · {{chars}} 字符 · 约 {{readingTime}} 分钟",
+      "selected": " · 选中 {{count}}",
+      "cursor": "行 {{line}}, 列 {{col}}"
+    },
+    "toolbar": {
+      "undo": "撤销 (Cmd+Z)",
+      "undoDone": "已撤销",
+      "redo": "重做 (Cmd+Shift+Z)",
+      "redoDone": "已重做",
+      "copy": "复制 (Cmd+C)",
+      "copyDone": "已复制",
+      "cut": "剪切 (Cmd+X)",
+      "cutDone": "已剪切",
+      "paste": "粘贴 (Cmd+V)",
+      "pasteDone": "已粘贴",
+      "clearAll": "清空全部内容",
+      "clearAllDone": "已清空",
+      "heading": "标题",
+      "heading1": "一级标题",
+      "heading2": "二级标题",
+      "heading3": "三级标题",
+      "heading4": "四级标题",
+      "heading5": "五级标题",
+      "heading6": "六级标题",
+      "bold": "粗体",
+      "boldCmd": "粗体 (Cmd+B)",
+      "boldDone": "已加粗",
+      "boldPlaceholder": "粗体文本",
+      "italic": "斜体",
+      "italicCmd": "斜体 (Cmd+I)",
+      "italicDone": "已斜体",
+      "italicPlaceholder": "斜体文本",
+      "strikethrough": "删除线",
+      "strikethroughCmd": "删除线 (Cmd+Shift+X)",
+      "strikethroughDone": "已添加删除线",
+      "strikethroughPlaceholder": "删除线文本",
+      "clearFormat": "清除格式",
+      "clearFormatDone": "已清除",
+      "unorderedList": "无序列表",
+      "orderedList": "有序列表",
+      "taskList": "任务列表",
+      "quote": "引用",
+      "horizontalRule": "分隔线",
+      "inserted": "已插入",
+      "footnote": "插入脚注",
+      "footnoteDone": "已插入脚注",
+      "footnotePlaceholder": "脚注内容",
+      "inlineCode": "行内代码",
+      "inlineCodeCmd": "行内代码 (Cmd+E)",
+      "inlineCodeDone": "已添加代码",
+      "inlineCodePlaceholder": "代码",
+      "codeBlock": "代码块",
+      "plainCodeBlock": "普通代码块",
+      "mermaidChart": "Mermaid 图表",
+      "mermaidFlowchart": "流程图",
+      "mermaidSequence": "时序图",
+      "mermaidClass": "类图",
+      "mermaidState": "状态图",
+      "mermaidER": "ER 图",
+      "mermaidPie": "饼图",
+      "mermaidGantt": "甘特图",
+      "mermaidMindmap": "思维导图",
+      "mermaidTimeline": "时间线",
+      "mermaidGit": "Git 图",
+      "mermaidJourney": "用户旅程",
+      "mermaidQuadrant": "象限图",
+      "mermaidXY": "XY 图表",
+      "mermaidSankey": "桑基图",
+      "mermaidBlock": "框图",
+      "mermaidArchitecture": "架构图",
+      "mathFormula": "数学公式",
+      "inlineFormula": "行内公式 $...$",
+      "blockFormula": "块级公式 $$...$$",
+      "scrollToTop": "滚动到顶部",
+      "scrollToBottom": "滚动到底部",
+      "openOutline": "打开大纲",
+      "closeOutline": "关闭大纲",
+      "editMode": "编辑模式",
+      "edit": "编辑",
+      "previewMode": "预览模式",
+      "preview": "预览",
+      "splitMode": "分屏模式",
+      "split": "分屏",
+      "insertLink": "插入链接",
+      "insertLinkCmd": "插入链接 (Cmd+K)",
+      "linkText": "链接文本",
+      "linkTextPlaceholder": "链接文本（可选，使用选中文本）",
+      "linkTextDefault": "链接文本",
+      "urlAddress": "URL 地址",
+      "cancel": "取消",
+      "insert": "插入",
+      "insertImage": "插入图片",
+      "imageDescription": "图片描述",
+      "imageDescPlaceholder": "图片描述（alt 文本）",
+      "imageDescDefault": "图片",
+      "imageUrl": "图片 URL",
+      "decreaseFont": "减小字体 (当前 {{size}}px)",
+      "increaseFont": "增大字体 (当前 {{size}}px)",
+      "currentFontSize": "当前字体大小",
+      "import": "导入",
+      "importFromFile": "从文件导入 (txt, md, docx, csv, html...)",
+      "importFromContent": "从正文导入",
+      "insertAll": "全部插入",
+      "importFailed": "导入失败：{{error}}",
+      "documentFiles": "文档文件",
+      "wordFiles": "Word 文档",
+      "textFiles": "文本文件",
+      "allFiles": "所有文件",
+      "insertTable": "插入表格",
+      "tableHeader": "标题",
+      "tableContent": "内容"
+    },
+    "attachAllFiles": "所有文件",
+    "attachDocFiles": "文档文件",
+    "attachTextFiles": "文本文件",
+    "attachWordDoc": "Word 文档",
+    "clickToOpen": "点击打开",
+    "imagePreview": "图片预览",
+    "lint": {
+      "duplicateHeading": "重复标题：与第 {{line}} 行的同级标题内容相同",
+      "emptyLinkText": "空链接：链接文本为空",
+      "emptyLinkUrl": "空链接：URL 为空",
+      "headingLevelSkip": "标题层级跳跃：从 H{{from}} 直接跳到 H{{to}}，建议使用 H{{suggest}}",
+      "unclosedCodeBlock": "未闭合的代码块：缺少结束的 ```"
+    },
+    "previewFailed": "无法预览：{{error}}",
+    "taskCompleted": "已完成",
+    "taskIncomplete": "未完成"
+  },
+  "chat": {
+    "title": "AI 助手",
+    "authorNotes": "提示词",
+    "authorNotesPlaceholder": "输入提示词，告诉 AI 你想要生成什么内容...",
+    "generate": "生成 AI 内容",
+    "regenerate": "重新生成",
+    "stopGeneration": "停止生成",
+    "settings": "AI 设置",
+    "provider": "AI 提供商",
+    "apiKey": "API 密钥",
+    "model": "模型",
+    "messagePlaceholder": "输入消息...",
+    "sendMessage": "发送",
+    "clearHistory": "清空历史",
+    "conversationHistory": "对话历史",
+    "newConversation": "新建对话",
+    "deleteConversation": "删除对话",
+    "renameConversation": "重命名对话",
+    "streamingEnabled": "流式生成",
+    "streamingStatus": "正在生成内容...",
+    "templates": "提示词模板",
+    "selectTemplate": "选择模板",
+    "noTemplate": "无模板",
+    "chatPlaceholder": "与 AI 助手对话...",
+    "user": "用户",
+    "assistant": "助手",
+    "contextNone": "随便聊聊",
+    "contextMaterial": "素材",
+    "contextPrompt": "提示词",
+    "contextGenerated": "正文",
+    "labelMaterial": "素材内容",
+    "labelPrompt": "提示词",
+    "labelGenerated": "正文内容",
+    "labelDocument": "文档内容",
+    "aiReply": "AI 回复（针对：{{label}}）",
+    "applied": "已应用",
+    "applyTo": "应用到{{label}}",
+    "copied": "已复制",
+    "copy": "复制",
+    "editMode": "编辑",
+    "previewMode": "预览",
+    "attachmentLabel": "[附件: {{name}}]",
+    "attachmentError": "[附件: {{name}}]\n(无法读取: {{error}})",
+    "sendFailed": "发送失败：{{error}}",
+    "contentApplied": "✅ 已将内容应用到「{{label}}」",
+    "configureApiKeyMsg": "请先配置 API Key 才能使用 AI 生成功能。\n\n请点击聊天面板下方的\"设置\"按钮，在设置面板的 AI 标签页中配置您的 API Key。",
+    "aiGenerateTitle": "AI 生成内容（生成前自动保存）",
+    "aiGenerateContent": "AI 生成内容",
+    "generating": "正在生成内容...\n\n(流式生成中，内容将逐步显示)",
+    "aiThinking": "💭 **AI 正在思考...**\n\n{{thinking}}",
+    "aiThinkingDone": "💭 **AI 思考过程：**\n\n{{thinking}}",
+    "generationComplete": "已根据您的提示词生成内容。\n\n生成的内容已自动更新到编辑器的 AI 内容栏。",
+    "unknownError": "未知错误",
+    "networkError": "网络连接失败：{{error}}\n\n请检查网络连接或稍后重试。",
+    "apiKeyError": "API Key 无效或未配置。\n\n请点击聊天面板下方的\"设置\"按钮，在设置面板的 AI 标签页中配置您的 API Key。",
+    "rateLimitError": "API 请求频率超限，请稍后重试。",
+    "generateFailed": "生成失败：{{error}}",
+    "chatTitle": "随便聊聊",
+    "aiAssistant": "AI 助手",
+    "promptLabel": "提示词",
+    "promptPlaceholder": "输入提示词，告诉 AI 如何扩展或改进你的内容...\n\n例如：\n- 请将这段散文扩展为更详细的描述\n- 保持原有的文学风格，增加更多细节\n- 重新组织段落结构，使逻辑更清晰",
+    "templateManage": "模板管理",
+    "quickTemplate": "快捷模板",
+    "clearPrompt": "清空提示词",
+    "charCount": "{{count}} 字符",
+    "webSearch": "联网搜索",
+    "webSearchUnsupported": "当前模型不支持联网搜索",
+    "tools": "工具调用",
+    "toolsHint": "启用后 AI 可调用内置工具（搜索文档等）",
+    "toolsUnsupported": "当前模型不支持工具调用",
+    "thinkingCollapsed": "💭 查看 AI 思考过程",
+    "generateHint": "根据提示词生成内容，自动更新到 AI 内容栏",
+    "configureApiWarning": "⚠️ 请先配置 API 服务",
+    "chatHistory": "对话记录 ({{count}})",
+    "clearChat": "清空对话",
+    "startChat": "与 AI 助手开始对话",
+    "configureApiFirst": "请先在设置中配置 API 服务",
+    "you": "你",
+    "ai": "AI",
+    "turnNumber": "第 {{num}} 轮",
+    "aiReplying": "AI 正在回复...",
+    "contextHintNone": "不附加文档内容",
+    "contextHintWith": "将「{{label}}」作为 AI 上下文",
+    "chatPlaceholderContext": "针对「{{label}}」聊聊...",
+    "chatPlaceholderNone": "随便聊聊...",
+    "attachmentRef": "附件参考资料"
+  },
+  "settings": {
+    "title": "设置",
+    "editor": "编辑器",
+    "appearance": "外观",
+    "language": "语言",
+    "theme": "主题",
+    "advanced": "高级",
+    "aboutTab": "关于",
+    "editorSettings": {
+      "title": "编辑器设置",
+      "fontSize": "字体大小",
+      "lineHeight": "行高",
+      "tabSize": "Tab 大小",
+      "autoSave": "自动保存",
+      "autoSaveInterval": "自动保存间隔",
+      "seconds": "秒",
+      "showLineNumbers": "显示行号",
+      "wordWrap": "自动换行",
+      "spellCheck": "拼写检查"
+    },
+    "appearanceSettings": {
+      "title": "外观设置",
+      "theme": "主题",
+      "themeLight": "浅色",
+      "themeDark": "深色",
+      "themeAuto": "跟随系统",
+      "layout": "布局",
+      "layoutVertical": "垂直",
+      "layoutHorizontal": "水平",
+      "fontSize": "界面字体大小",
+      "sidebarWidth": "侧边栏宽度",
+      "chatPanelWidth": "聊天面板宽度"
+    },
+    "languageSettings": {
+      "title": "语言设置",
+      "select": "选择语言",
+      "chinese": "中文",
+      "english": "English",
+      "japanese": "日本語",
+      "restartRequired": "更改语言后建议重启应用以获得最佳体验"
+    },
+    "advancedSettings": {
+      "title": "高级设置",
+      "dataPath": "数据路径",
+      "logPath": "日志路径",
+      "version": "版本",
+      "debugMode": "调试模式",
+      "experimentalFeatures": "实验性功能",
+      "clearCache": "清除缓存",
+      "resetSettings": "重置设置",
+      "exportSettings": "导出设置",
+      "importSettings": "导入设置"
+    },
+    "about": {
+      "title": "关于 AiDocPlus",
+      "version": "版本",
+      "description": "基于 AI 的智能文档创作工具",
+      "website": "官方网站",
+      "websiteUrl": "https://aidocplus.com",
+      "github": "GitHub 仓库",
+      "license": "许可证"
+    },
+    "saved": "设置已保存",
+    "reset": "设置已重置",
+    "importSuccess": "设置已导入",
+    "exportSuccess": "设置已导出",
+    "cacheCleared": "缓存已清除",
+    "templateTab": "模板",
+    "emailTab": "邮件",
+    "templateManagement": "模板管理",
+    "templateManagementDesc": "管理文档模板。可通过\"文件 → 存为模板\"将当前文档保存为模板，或通过\"文件 → 从模板新建\"使用模板创建文档。",
+    "openTemplateManager": "打开模板管理器",
+    "templateUsage": "使用方法",
+    "templateUsageStep1": "1. 编辑文档后，点击工具栏模板按钮或菜单\"文件 → 存为模板\"",
+    "templateUsageStep2": "2. 设置模板名称、分类，选择保留的内容",
+    "templateUsageStep3": "3. 新建文档时，使用\"文件 → 从模板新建\"（⌘⇧T）选择模板",
+    "templateUsageStep4": "4. 模板存储在 ~/AiDocPlus/Templates/ 目录中",
+    "editorFont": "编辑器字体",
+    "fontSystemDefault": "系统默认",
+    "fontPingFang": "苹方 / 微软雅黑",
+    "fontNotoSans": "思源黑体",
+    "fontNotoSerif": "思源宋体",
+    "fontSongti": "宋体",
+    "fontKaiti": "楷体",
+    "fontJetBrains": "等宽字体 (JetBrains Mono)",
+    "fontCascadia": "等宽字体 (Cascadia Code)",
+    "fontApplyHint": "应用于编辑器和预览区域",
+    "editorFeatures": "编辑器功能",
+    "highlightActiveLine": "高亮当前行",
+    "highlightActiveLineDesc": "高亮显示光标所在行",
+    "bracketMatching": "括号匹配",
+    "bracketMatchingDesc": "高亮显示匹配的括号",
+    "closeBrackets": "自动闭合括号",
+    "closeBracketsDesc": "输入左括号时自动补全右括号",
+    "codeFolding": "代码折叠",
+    "codeFoldingDesc": "在行号旁显示折叠/展开按钮",
+    "highlightSelMatches": "高亮选中匹配",
+    "highlightSelMatchesDesc": "高亮文档中与选中文本相同的内容",
+    "autocompletion": "自动补全",
+    "autocompletionDesc": "输入时显示 Markdown 语法建议",
+    "multiCursor": "多光标编辑",
+    "multiCursorDesc": "按住 Alt 拖拽可创建矩形选区",
+    "scrollPastEnd": "滚动超出末尾",
+    "scrollPastEndDesc": "允许滚动到文档最后一行之后",
+    "indentOnInput": "自动缩进",
+    "indentOnInputDesc": "输入特定字符时自动调整缩进",
+    "markdownLint": "Markdown 语法检查",
+    "markdownLintDesc": "实时检查标题层级、空链接、未闭合代码块等问题",
+    "defaultViewMode": "默认视图模式",
+    "viewEdit": "编辑",
+    "viewPreview": "预览",
+    "viewSplit": "分屏",
+    "defaultViewModeDesc": "打开文档时的默认显示模式",
+    "toolbarButtons": "工具栏按钮",
+    "toolbarButtonsDesc": "选择在编辑器工具栏中显示哪些按钮组",
+    "toolbar": {
+      "undo": "撤销",
+      "redo": "重做",
+      "copy": "复制",
+      "cut": "剪切",
+      "paste": "粘贴",
+      "clearAll": "清空内容",
+      "headings": "标题",
+      "bold": "粗体",
+      "italic": "斜体",
+      "strikethrough": "删除线",
+      "inlineCode": "行内代码",
+      "clearFormat": "清除格式",
+      "unorderedList": "无序列表",
+      "orderedList": "有序列表",
+      "taskList": "任务列表",
+      "quote": "引用",
+      "horizontalRule": "分隔线",
+      "link": "链接",
+      "image": "图片",
+      "table": "表格",
+      "footnote": "脚注",
+      "codeBlock": "代码块",
+      "mermaid": "Mermaid 图表",
+      "math": "数学公式",
+      "importFile": "导入文件",
+      "goToTop": "滚动到顶部",
+      "goToBottom": "滚动到底部"
+    },
+    "aiServiceConfig": "AI 服务配置",
+    "createApiService": "创建 API 服务",
+    "noAiServices": "还没有配置任何 AI 服务",
+    "noAiServicesHint": "点击上方「创建 API 服务」按钮添加一个",
+    "inUse": "使用中",
+    "modelLabel": "模型: {{model}}",
+    "defaultModel": "默认模型",
+    "noKeyWarning": "⚠️ 未配置 Key",
+    "enable": "启用",
+    "disable": "禁用",
+    "edit": "编辑",
+    "delete": "删除",
+    "globalSettings": "全局设置",
+    "streamingOutput": "流式输出",
+    "streamingOutputDesc": "启用后 AI 回复将逐字显示",
+    "enableThinking": "深度思考",
+    "enableThinkingDesc": "启用后支持的模型将展示推理/思考过程（Qwen/DeepSeek/Claude 等）",
+    "forceMarkdown": "强制 Markdown 格式输出",
+    "forceMarkdownDesc": "启用后 AI 将始终以纯净 Markdown 格式返回内容，不含多余的开场白和总结语",
+    "markdownPromptPlaceholder": "Markdown 格式约束提示词...",
+    "systemPromptLabel": "System Prompt",
+    "systemPromptOptional": "(可选)",
+    "systemPromptPlaceholder": "可选，留空则不附加额外系统提示词...",
+    "pluginContentLimit": "插件正文字数限制",
+    "pluginContentLimitDesc": "插件发送给 AI 的正文最大字符数，0 表示不限制",
+    "pluginContentLimitPlaceholder": "0（不限制）",
+    "createApiServiceTitle": "创建 API 服务",
+    "editApiServiceTitle": "编辑 API 服务",
+    "serviceNameLabel": "服务名称",
+    "serviceNameOptional": "(可选，留空自动命名)",
+    "serviceNamePlaceholder": "例如：我的 GPT 服务",
+    "providerLabel": "服务商",
+    "apiKeyRequired": "API Key",
+    "apiKeyRequiredMark": "*必填",
+    "modelSelectPlaceholder": "选择预置模型...",
+    "customModel": "自定义模型...",
+    "modelIdLabel": "模型 ID（实际调用值，可手动修改）",
+    "modelIdPlaceholder": "输入模型 ID，如 kimi-k2.5",
+    "baseUrlPlaceholder": "输入 Base URL",
+    "testing": "测试中...",
+    "testConnection": "测试连接",
+    "cancel": "取消",
+    "save": "保存",
+    "emailAccountConfig": "邮箱账户配置",
+    "addEmailAccount": "添加邮箱账户",
+    "noEmailAccounts": "还没有配置任何邮箱账户",
+    "noEmailAccountsHint": "点击上方「添加邮箱账户」按钮添加一个",
+    "emailProviderSupport": "支持网易 163、126、移动 139、QQ 邮箱、Gmail、Outlook 等",
+    "customProvider": "自定义",
+    "noEmailConfigured": "未配置邮箱地址",
+    "noAuthCodeWarning": "⚠️ 未配置授权码",
+    "emailUsageTitle": "使用说明",
+    "emailUsageStep1": "1. 选择邮箱服务商后，SMTP 服务器地址和端口会自动填充",
+    "emailUsageStep2": "2. 大多数邮箱需要开启 SMTP 服务并获取授权码（非登录密码）",
+    "emailUsageStep3": "3. 配置完成后可点击「测试连接」验证设置是否正确",
+    "emailUsageStep4": "4. 在邮件发送插件中可直接选择已配置的账户发送邮件",
+    "addEmailAccountTitle": "添加邮箱账户",
+    "editEmailAccountTitle": "编辑邮箱账户",
+    "accountNameLabel": "账户名称",
+    "accountNameOptional": "(可选，留空自动命名)",
+    "accountNamePlaceholder": "例如：我的工作邮箱",
+    "emailProviderLabel": "邮箱服务商",
+    "emailAddressLabel": "邮箱地址",
+    "emailAddressRequired": "*必填",
+    "smtpAuthCodeLabel": "SMTP 授权码",
+    "smtpAuthCodeRequired": "*必填",
+    "smtpAuthCodePlaceholder": "SMTP 授权码（非登录密码）",
+    "senderNameLabel": "发件人显示名称",
+    "senderNameOptional": "(可选)",
+    "senderNamePlaceholder": "收件人看到的发件人名称",
+    "smtpServerSettings": "SMTP 服务器设置（选择服务商后自动填充，也可手动修改）",
+    "smtpAddress": "SMTP 地址",
+    "smtpPort": "端口",
+    "smtpEncryption": "加密方式",
+    "noEncryption": "无加密",
+    "pluginCategoryContentGen": "内容生成",
+    "pluginCategoryFunctional": "功能执行",
+    "pluginUsageCount": "已使用 {{count}} 次",
+    "noMatchingPlugins": "未找到匹配的插件",
+    "plugins": "插件",
+    "roleTab": "角色",
+    "roleSettings": {
+      "title": "角色设定",
+      "description": "选择一个职业角色，AI 将自动适配该角色的专业知识和写作风格。",
+      "currentRole": "当前角色",
+      "noRole": "未选择角色（使用通用模式）",
+      "builtinRoles": "内置角色",
+      "customRoles": "自定义角色",
+      "deleteConfirm": "确定删除该自定义角色吗？",
+      "promptPreview": "角色 System Prompt 预览",
+      "promptNote": "此 prompt 会自动拼接在您的自定义 System Prompt 之前，为 AI 建立职业身份基调。",
+      "recommendations": "角色推荐",
+      "recommendedTemplates": "推荐模板分类",
+      "recommendedPlugins": "推荐插件"
+    },
+    "pluginsSettings": {
+      "builtin": "内置",
+      "custom": "自定义",
+      "description": "管理文档处理插件。插件可以对文档内容进行二次加工，如生成 PPT、思维导图等。",
+      "enabled": "已启用",
+      "noPlugins": "暂无可用插件",
+      "searchPlaceholder": "搜索插件...",
+      "title": "插件管理",
+      "usage": "使用方法",
+      "usageStep1": "1. 在文档编辑器工具栏中点击 🧩 插件按钮",
+      "usageStep2": "2. 从下拉菜单中选择要使用的插件",
+      "usageStep3": "3. 插件面板将替代编辑器区域显示，点击“返回编辑器”可退出"
+    },
+    "resetConfirm": "Are you sure you want to reset all settings to default?",
+    "templateManager": {
+      "add": "添加",
+      "addCategory": "添加分类",
+      "all": "全部",
+      "builtin": "内置",
+      "cancel": "取消",
+      "categoryKeyPlaceholder": "分类标识（英文，如 proposal）",
+      "categoryLabelPlaceholder": "显示名称（如 提案）",
+      "categoryNamePlaceholder": "分类名称",
+      "confirmDelete": "确认删除",
+      "confirmDeleteCategory": "确定删除 ",
+      "copy": "复制",
+      "copySuffix": "(副本)",
+      "custom": "自定义",
+      "delete": "删除",
+      "descriptionPlaceholder": "描述（可选）",
+      "edit": "编辑",
+      "manageCategories": "管理分类",
+      "manageCategoriesDesc": "创建、编辑、排序或删除模板分类",
+      "moveDown": "下移",
+      "moveUp": "上移",
+      "noCategories": "暂无分类",
+      "noMatchingTemplates": "没有匹配的模板",
+      "noTemplates": "暂无模板",
+      "searchPlaceholder": "搜索模板...",
+      "templateNamePlaceholder": "模板名称",
+      "title": "管理模板"
+    }
+  },
+  "search": {
+    "title": "搜索",
+    "placeholder": "搜索文档...",
+    "searchInContent": "搜索内容",
+    "searchInTitles": "搜索标题",
+    "matchCase": "区分大小写",
+    "matchWholeWord": "全字匹配",
+    "useRegex": "使用正则表达式",
+    "results": "结果",
+    "noResults": "未找到结果",
+    "searching": "搜索中...",
+    "foundResults": "找到 {{count}} 个结果",
+    "searchHistory": "搜索历史",
+    "clearHistory": "清除历史",
+    "openFile": "打开文件",
+    "openInNewTab": "在新标签页中打开"
+  },
+  "version": {
+    "title": "版本历史",
+    "currentVersion": "当前版本",
+    "versionCount": "{{count}} 个版本",
+    "noVersions": "暂无版本历史",
+    "createdAt": "创建于",
+    "createdBy": "创建者",
+    "changeDescription": "变更说明",
+    "preview": "预览",
+    "restore": "恢复",
+    "compare": "对比",
+    "restoreConfirm": "确定要恢复到此版本吗？",
+    "restoreBackup": "恢复前是否为当前状态创建备份？",
+    "restoring": "恢复中...",
+    "restored": "已恢复到版本 {{version}}",
+    "compareWith": "与 {{version}} 对比",
+    "diffViewer": "差异查看器",
+    "noChanges": "无差异",
+    "additions": "新增",
+    "deletions": "删除",
+    "changes": "变更",
+    "clearSelection": "清除选择",
+    "create": "Create Version",
+    "leftVersion": "Earlier Version",
+    "restoreToThis": "恢复到此版本",
+    "rightVersion": "Later Version",
+    "selectForCompare": "选为对比版本",
+    "selectToPreview": "Select a version to preview",
+    "sideBySide": "并排对比",
+    "switchToLeft": "切换为左侧版本",
+    "unified": "统一视图",
+    "restoreVersion": "恢复版本"
+  },
+  "templates": {
+    "title": "提示词模板",
+    "builtin": "内置模板",
+    "custom": "自定义模板",
+    "createTemplate": "新建模板",
+    "editTemplate": "编辑模板",
+    "deleteTemplate": "删除模板",
+    "importTemplate": "导入模板",
+    "exportTemplate": "导出模板",
+    "templateName": "模板名称",
+    "templateCategory": "分类",
+    "templateContent": "模板内容",
+    "variables": "变量",
+    "noTemplates": "暂无模板",
+    "templateDeleted": "模板已删除",
+    "templateSaved": "模板已保存",
+    "templateImported": "模板已导入",
+    "templateExported": "模板已导出",
+    "allCategories": "全部",
+    "category": "分类",
+    "manageCategories": "管理分类",
+    "categoryKey": "分类标识（英文）",
+    "categoryDisplayName": "显示名称",
+    "categoryIcon": "图标",
+    "confirmDeleteCategory": "确定删除该分类？该分类下的模板不会被删除。",
+    "clickToPreview": "点击模板查看预览",
+    "useTemplate": "使用此模板",
+    "noCustomTemplates": "暂无自定义模板",
+    "confirmDelete": "确定要删除此模板吗？",
+    "saveAsTemplate": "存为模板",
+    "saveAsDescription": "将当前文档保存为可复用的模板",
+    "templateNameLabel": "模板名称",
+    "templateNamePlaceholder": "输入模板名称",
+    "descriptionLabel": "描述",
+    "descriptionPlaceholder": "简要描述模板用途（可选）",
+    "categoryLabel": "分类",
+    "retainContent": "保留内容",
+    "retainPrompt": "提示词",
+    "retainPluginSettings": "插件设置",
+    "retainMaterial": "素材内容",
+    "retainMainContent": "正文内容",
+    "retainPluginData": "插件数据",
+    "cancel": "取消",
+    "saving": "保存中...",
+    "saveTemplate": "保存模板",
+    "creating": "创建中...",
+    "createFromTemplate": "从模板创建",
+    "createBlankDoc": "创建空白文档",
+    "confirmDeleteCategoryNamed": "确定删除 \"{{name}}\"？",
+    "delete": "删除",
+    "builtinTag": "内置",
+    "customTag": "自定义",
+    "editCategory": "编辑",
+    "deleteCategory": "删除",
+    "createFailed": "创建失败: {{error}}",
+    "manageCategoriesTitle": "管理模板分类",
+    "manageCategoriesDesc": "创建、编辑、排序或删除模板分类。拖拽可调整顺序。",
+    "categoryNamePlaceholder": "分类名称",
+    "noCategories": "暂无分类",
+    "categoryKeyPlaceholder": "分类标识（英文，如 proposal）",
+    "categoryLabelPlaceholder": "显示名称（如 提案）",
+    "addCategory": "添加分类",
+    "add": "添加",
+    "promptPlaceholder": "输入提示词模板内容...",
+    "newFromTemplate": "从模板新建文档",
+    "docTitle": "文档标题",
+    "docTitlePlaceholder": "输入文档标题（留空使用模板名称）",
+    "all": "全部",
+    "searchPlaceholder": "搜索模板...",
+    "blankDocument": "空白文档",
+    "blankDocumentDesc": "创建一个空白文档",
+    "noMatchingTemplates": "没有匹配的模板",
+    "noTemplatesHint": "暂无模板，可通过\"存为模板\"创建",
+    "pluginCount": "{{count}} 个插件",
+    "untitledDocument": "未命名文档",
+    "categories": {
+      "editing": "编辑处理",
+      "official": "公文",
+      "travel": "旅游出行",
+      "creative": "创意写作",
+      "humor": "搞笑",
+      "business": "商务办公",
+      "learning": "学习教育",
+      "daily": "生活实用",
+      "translation": "翻译",
+      "speech": "演讲汇报",
+      "marketing": "营销文案",
+      "academic": "学术写作",
+      "tech": "技术文档",
+      "life": "生活记录",
+      "career": "职场成长",
+      "event": "活动策划",
+      "essay": "作文",
+      "exam-grad": "考研复习",
+      "exam-civil": "考公复习",
+      "exam-abroad": "留学考试",
+      "health": "健康养生",
+      "literature": "文学"
+    },
+    "builtinTemplates": {
+      "polish-pro": {
+        "name": "专业润色",
+        "description": "专业级文本润色，提升语言质量和表达效果"
+      },
+      "summarize-pro": {
+        "name": "智能摘要",
+        "description": "多层次结构化摘要，含一句话概括和核心要点"
+      },
+      "expand": {
+        "name": "扩展内容",
+        "description": "将简短内容扩展为更详细的描述"
+      },
+      "rewrite": {
+        "name": "改写内容",
+        "description": "以不同方式重新表达内容"
+      },
+      "translate": {
+        "name": "翻译内容",
+        "description": "将内容翻译为指定语言"
+      },
+      "translate-polish": {
+        "name": "翻译润色",
+        "description": "对译文进行润色优化，使其更地道自然"
+      },
+      "business-email-formal": {
+        "name": "正式商务邮件",
+        "description": "正式商务邮件，适用于客户沟通、合作洽谈等场景"
+      },
+      "business-weekly-report": {
+        "name": "工作周报",
+        "description": "结构化工作周报，含完成工作、问题、计划"
+      },
+      "business-project-proposal": {
+        "name": "项目方案",
+        "description": "完整项目计划方案，含背景、目标、实施计划、风险"
+      },
+      "business-resume": {
+        "name": "求职简历",
+        "description": "专业求职简历，突出核心优势和量化业绩"
+      },
+      "marketing-product-desc": {
+        "name": "产品描述",
+        "description": "电商产品描述文案，突出卖点和使用场景"
+      },
+      "marketing-social-media": {
+        "name": "社交媒体文案",
+        "description": "社交媒体文案，适配微信/微博/小红书等平台"
+      },
+      "marketing-ad-copy": {
+        "name": "广告文案",
+        "description": "SEM/信息流广告文案，注重转化效果"
+      },
+      "academic-paper-outline": {
+        "name": "论文大纲",
+        "description": "学术论文大纲，含完整章节结构和写作要点"
+      },
+      "academic-literature-review": {
+        "name": "文献综述",
+        "description": "系统性文献综述，梳理研究现状与空白"
+      },
+      "daily-cover-letter": {
+        "name": "求职自荐信",
+        "description": "求职自荐信，突出能力匹配和求职动机"
+      },
+      "daily-complaint-letter": {
+        "name": "投诉信/维权信",
+        "description": "理性维权信件，有理有据表达诉求"
+      },
+      "tech-api-doc": {
+        "name": "API 文档",
+        "description": "RESTful API 接口文档，含参数、示例、错误码"
+      },
+      "tech-readme": {
+        "name": "项目 README",
+        "description": "开源项目 README，含安装、使用、贡献指南"
+      },
+      "gongwen": {
+        "name": "公文格式（通用）",
+        "description": "按照公文排版标准（GB/T 9704）的标题层级生成内容"
+      },
+      "gongwen-personal-summary": {
+        "name": "年度个人总结",
+        "description": "年度个人工作总结，含工作回顾、成绩、不足、计划"
+      },
+      "gongwen-unit-summary": {
+        "name": "年度单位总结",
+        "description": "单位/部门年度工作总结"
+      },
+      "gongwen-meeting-statement": {
+        "name": "会议表态发言",
+        "description": "会议表态发言稿，态度鲜明、措施具体"
+      },
+      "gongwen-meeting-typical": {
+        "name": "会议典型发言",
+        "description": "典型经验交流发言，分享可复制可推广的做法"
+      },
+      "gongwen-work-report": {
+        "name": "工作汇报",
+        "description": "阶段性工作进展汇报"
+      },
+      "gongwen-notice": {
+        "name": "通知",
+        "description": "发布工作安排/事项通知"
+      },
+      "lit-prose": {
+        "name": "散文",
+        "description": "抒情或叙事散文，语言优美、意境深远"
+      },
+      "lit-novel-chapter": {
+        "name": "小说章节",
+        "description": "小说章节创作，人物鲜明、情节起伏"
+      },
+      "lit-poem-modern": {
+        "name": "现代诗",
+        "description": "自由体现代诗，意象新颖、语言凝练"
+      },
+      "lit-book-review": {
+        "name": "书评/读后感",
+        "description": "书评或读后感，含分析与感悟"
+      },
+      "essay-narrative": {
+        "name": "记叙文",
+        "description": "叙事性作文，六要素齐全、描写生动"
+      },
+      "essay-argumentative": {
+        "name": "议论文",
+        "description": "议论文，论点鲜明、论据充分"
+      },
+      "essay-descriptive": {
+        "name": "写景状物文",
+        "description": "写景状物类作文，观察细致、情景交融"
+      },
+      "essay-letter": {
+        "name": "书信/应用文",
+        "description": "书信或应用文，格式规范、语气得体"
+      },
+      "humor-sketch": {
+        "name": "小品剧本",
+        "description": "幽默小品剧本，笑点密集、有反转"
+      },
+      "humor-roast": {
+        "name": "吐槽段子",
+        "description": "吐槽风格段子集，短小精悍、角度刁钻"
+      },
+      "humor-parody": {
+        "name": "恶搞改编",
+        "description": "对经典文章的搞笑改编，古今反差"
+      },
+      "humor-crosstalk": {
+        "name": "相声/脱口秀",
+        "description": "相声或脱口秀文稿，包袱精准、节奏感强"
+      },
+      "editing-grammar-check": {
+        "name": "语法检查",
+        "description": "语法错误检测和修正"
+      },
+      "editing-rewrite-plagiarism": {
+        "name": "降重改写",
+        "description": "论文降重改写"
+      },
+      "editing-style-convert": {
+        "name": "文体转换",
+        "description": "正式/口语/学术等风格转换"
+      },
+      "editing-proofread": {
+        "name": "内容校对",
+        "description": "事实核查和逻辑校对"
+      },
+      "editing-keywords": {
+        "name": "关键词提取",
+        "description": "提取文章关键词"
+      },
+      "editing-title-generate": {
+        "name": "标题生成",
+        "description": "根据内容生成标题"
+      },
+      "business-meeting-minutes": {
+        "name": "会议纪要",
+        "description": "会议记录和要点整理"
+      },
+      "business-invitation": {
+        "name": "商务邀请",
+        "description": "商务活动邀请函"
+      },
+      "business-partnership": {
+        "name": "合作提案",
+        "description": "合作方案/商业计划"
+      },
+      "business-contract-review": {
+        "name": "合同审阅",
+        "description": "合同要点审阅"
+      },
+      "business-prd": {
+        "name": "产品需求文档",
+        "description": "PRD文档模板"
+      },
+      "business-user-research": {
+        "name": "用户调研",
+        "description": "用户调研报告"
+      },
+      "business-competitor-analysis": {
+        "name": "竞品分析",
+        "description": "竞品分析报告"
+      },
+      "business-data-report": {
+        "name": "数据报告",
+        "description": "业务数据分析报告"
+      },
+      "learning-paper-writing": {
+        "name": "论文写作",
+        "description": "学术论文写作指南"
+      },
+      "learning-citation": {
+        "name": "文献引用",
+        "description": "文献引用格式规范"
+      },
+      "learning-lab-report": {
+        "name": "实验报告",
+        "description": "实验报告模板"
+      },
+      "learning-online-notes": {
+        "name": "在线学习笔记",
+        "description": "网课笔记方法"
+      },
+      "daily-leave-request": {
+        "name": "请假条",
+        "description": "各类请假申请"
+      },
+      "daily-thank-you": {
+        "name": "感谢信",
+        "description": "感谢信/感谢邮件"
+      },
+      "daily-apology": {
+        "name": "道歉信",
+        "description": "道歉信/道歉邮件"
+      },
+      "daily-invitation-personal": {
+        "name": "私人邀请函",
+        "description": "私人活动邀请"
+      },
+      "daily-congratulation": {
+        "name": "祝贺信",
+        "description": "祝贺信/祝贺邮件"
+      },
+      "daily-recommendation-personal": {
+        "name": "个人推荐信",
+        "description": "个人推荐信"
+      },
+      "daily-sympathy": {
+        "name": "慰问信",
+        "description": "慰问信/慰问短信"
+      },
+      "daily-lost-found": {
+        "name": "寻物启事",
+        "description": "寻物启事/招领启事"
+      },
+      "translation-terminology": {
+        "name": "术语翻译",
+        "description": "专业术语翻译"
+      },
+      "translation-colloquial": {
+        "name": "口语化翻译",
+        "description": "自然口语翻译"
+      },
+      "translation-subtitle": {
+        "name": "字幕翻译",
+        "description": "视频字幕翻译"
+      },
+      "translation-business": {
+        "name": "商务翻译",
+        "description": "商务文档翻译"
+      },
+      "speech-product-launch": {
+        "name": "新产品发布会",
+        "description": "产品发布演讲"
+      },
+      "speech-annual-party": {
+        "name": "年会发言",
+        "description": "年会/总结大会发言"
+      },
+      "marketing-soft-article": {
+        "name": "软文写作",
+        "description": "营销软文"
+      },
+      "marketing-short-video": {
+        "name": "短视频脚本",
+        "description": "短视频内容脚本"
+      },
+      "marketing-live-stream": {
+        "name": "直播话术",
+        "description": "直播带货话术"
+      },
+      "marketing-promotion": {
+        "name": "活动文案",
+        "description": "促销活动文案"
+      },
+      "marketing-brand-story": {
+        "name": "品牌故事",
+        "description": "品牌故事撰写"
+      },
+      "marketing-review-reply": {
+        "name": "用户评价回复",
+        "description": "评价回复模板"
+      },
+      "marketing-email": {
+        "name": "邮件营销",
+        "description": "营销邮件模板"
+      },
+      "gongwen-qingshi": {
+        "name": "请示",
+        "description": "请示公文"
+      },
+      "gongwen-pifu": {
+        "name": "批复",
+        "description": "批复公文"
+      },
+      "gongwen-han": {
+        "name": "函",
+        "description": "公函/信函"
+      },
+      "gongwen-jiyao": {
+        "name": "纪要",
+        "description": "会议纪要"
+      },
+      "gongwen-jianbao": {
+        "name": "简报",
+        "description": "工作简报"
+      },
+      "academic-abstract": {
+        "name": "摘要写作",
+        "description": "论文摘要撰写"
+      },
+      "academic-introduction": {
+        "name": "引言写作",
+        "description": "论文引言撰写"
+      },
+      "academic-conclusion": {
+        "name": "结论写作",
+        "description": "论文结论撰写"
+      },
+      "academic-reference": {
+        "name": "参考文献格式",
+        "description": "参考文献规范"
+      },
+      "academic-email": {
+        "name": "学术邮箱",
+        "description": "学术邮件模板"
+      },
+      "academic-cover-letter": {
+        "name": "投稿信",
+        "description": "期刊投稿信"
+      },
+      "tech-design-doc": {
+        "name": "技术方案",
+        "description": "技术设计文档"
+      },
+      "tech-deployment": {
+        "name": "部署文档",
+        "description": "部署指南"
+      },
+      "tech-changelog": {
+        "name": "变更日志",
+        "description": "CHANGELOG"
+      },
+      "tech-user-manual": {
+        "name": "用户手册",
+        "description": "用户使用手册"
+      },
+      "tech-code-comment": {
+        "name": "代码注释",
+        "description": "代码注释规范"
+      },
+      "tech-test-case": {
+        "name": "测试用例",
+        "description": "测试用例文档"
+      },
+      "life-finance": {
+        "name": "财务记录",
+        "description": "收支记录模板"
+      },
+      "life-time-log": {
+        "name": "时间日志",
+        "description": "时间追踪记录"
+      },
+      "event-wedding": {
+        "name": "婚礼策划",
+        "description": "婚礼策划方案"
+      },
+      "event-birthday": {
+        "name": "生日派对",
+        "description": "生日派对策划"
+      },
+      "event-online": {
+        "name": "线上活动",
+        "description": "线上活动策划"
+      },
+      "travel-family": {
+        "name": "亲子游攻略",
+        "description": "亲子旅游攻略"
+      },
+      "travel-roadtrip": {
+        "name": "自驾游攻略",
+        "description": "自驾游攻略"
+      },
+      "essay-expository": {
+        "name": "说明文",
+        "description": "说明文写作"
+      },
+      "essay-reading-response": {
+        "name": "读后感",
+        "description": "读后感写作"
+      },
+      "essay-movie-response": {
+        "name": "观后感",
+        "description": "观后感写作"
+      },
+      "essay-speech-draft": {
+        "name": "演讲稿",
+        "description": "演讲稿写作"
+      },
+      "essay-investigation": {
+        "name": "调查报告",
+        "description": "调查报告写作"
+      },
+      "essay-imagination": {
+        "name": "想象作文",
+        "description": "想象作文写作"
+      },
+      "exam-grad-adjustment": {
+        "name": "考研调剂",
+        "description": "调剂申请和沟通"
+      },
+      "exam-grad-interview": {
+        "name": "复试问答",
+        "description": "常见复试问题"
+      },
+      "exam-civil-short-answer": {
+        "name": "申论小题",
+        "description": "归纳概括等小题"
+      },
+      "exam-civil-doc-writing": {
+        "name": "公文写作",
+        "description": "申论公文写作"
+      },
+      "exam-civil-hot-topics": {
+        "name": "面试热点",
+        "description": "面试热点话题"
+      },
+      "exam-civil-group-discussion": {
+        "name": "无领导讨论",
+        "description": "无领导小组讨论"
+      },
+      "exam-civil-medical-check": {
+        "name": "体检政审",
+        "description": "体检政审准备"
+      },
+      "exam-abroad-toefl-speaking": {
+        "name": "托福口语",
+        "description": "托福口语模板"
+      },
+      "exam-abroad-toefl-writing": {
+        "name": "托福写作",
+        "description": "托福写作模板"
+      },
+      "exam-abroad-ielts-reading": {
+        "name": "雅思阅读",
+        "description": "雅思阅读技巧"
+      },
+      "exam-abroad-gmat": {
+        "name": "GMAT备考",
+        "description": "GMAT备考计划"
+      },
+      "lit-ancient-poetry": {
+        "name": "古体诗",
+        "description": "古诗词创作"
+      },
+      "lit-ci-poetry": {
+        "name": "词牌",
+        "description": "填词创作"
+      },
+      "lit-couplet": {
+        "name": "对联",
+        "description": "对联创作"
+      },
+      "lit-micro-fiction": {
+        "name": "微小说",
+        "description": "微小说创作"
+      },
+      "humor-dad-jokes": {
+        "name": "冷笑话",
+        "description": "冷笑话创作"
+      },
+      "humor-meme-text": {
+        "name": "表情包文案",
+        "description": "表情包配文"
+      },
+      "career-plan": {
+        "name": "职业规划",
+        "description": "职业发展方向和目标规划"
+      },
+      "career-interview": {
+        "name": "面试问答",
+        "description": "常见面试问题及回答"
+      },
+      "career-resume-optimize": {
+        "name": "简历优化",
+        "description": "简历诊断和优化建议"
+      },
+      "career-salary-negotiate": {
+        "name": "薪资谈判",
+        "description": "薪资谈判策略和话术"
+      },
+      "career-resignation": {
+        "name": "离职沟通",
+        "description": "离职申请和交接沟通"
+      },
+      "career-promotion": {
+        "name": "晋升申请",
+        "description": "晋升申请和述职"
+      },
+      "career-feedback": {
+        "name": "绩效反馈",
+        "description": "绩效面谈和反馈"
+      },
+      "career-mentoring": {
+        "name": "导师沟通",
+        "description": "与上级/导师沟通"
+      },
+      "career-network": {
+        "name": "职场社交",
+        "description": "职场社交和名片邮件"
+      },
+      "career-worklife": {
+        "name": "工作生活平衡",
+        "description": "工作生活平衡建议"
+      },
+      "creative-script": {
+        "name": "剧本创作",
+        "description": "短剧/微电影剧本"
+      },
+      "creative-lyrics": {
+        "name": "歌词创作",
+        "description": "各类风格歌词"
+      },
+      "creative-poetry": {
+        "name": "诗歌创作",
+        "description": "现代诗/古体诗"
+      },
+      "creative-story": {
+        "name": "故事创作",
+        "description": "短篇小说/故事"
+      },
+      "creative-slogan": {
+        "name": "口号标语",
+        "description": "宣传口号/标语"
+      },
+      "creative-naming": {
+        "name": "创意命名",
+        "description": "品牌/产品/角色命名"
+      },
+      "creative-ad-idea": {
+        "name": "广告创意",
+        "description": "广告创意构思"
+      },
+      "creative-plot": {
+        "name": "剧情大纲",
+        "description": "影视/小说剧情大纲"
+      },
+      "health-diet-plan": {
+        "name": "饮食计划",
+        "description": "健康饮食计划制定"
+      },
+      "health-workout": {
+        "name": "运动计划",
+        "description": "健身运动计划"
+      },
+      "health-mental": {
+        "name": "心理调适",
+        "description": "心理健康建议"
+      },
+      "health-sleep": {
+        "name": "睡眠改善",
+        "description": "睡眠质量改善方案"
+      },
+      "health-recipe": {
+        "name": "健康食谱",
+        "description": "营养食谱推荐"
+      },
+      "health-habit": {
+        "name": "健康习惯",
+        "description": "健康习惯养成计划"
+      },
+      "health-check": {
+        "name": "体检解读",
+        "description": "体检报告解读"
+      },
+      "health-weight": {
+        "name": "体重管理",
+        "description": "减肥/增重计划"
+      }
+    },
+    "categoryArticle": "文章",
+    "categoryCreative": "创意写作",
+    "categoryEmailDraft": "邮件草稿",
+    "categoryGeneral": "通用",
+    "categoryMeeting": "会议纪要",
+    "categoryReport": "报告",
+    "categoryTechnical": "技术文档"
+  },
+  "conversations": {
+    "title": "对话管理",
+    "newConversation": "新建对话",
+    "deleteConversation": "删除对话",
+    "renameConversation": "重命名对话",
+    "search": "搜索对话",
+    "today": "今天",
+    "yesterday": "昨天",
+    "lastWeek": "上周",
+    "lastMonth": "上月",
+    "older": "更早",
+    "noConversations": "暂无对话",
+    "conversationCount": "{{count}} 个对话",
+    "confirmDelete": "确定要删除此对话吗？",
+    "deleted": "对话已删除",
+    "renamed": "对话已重命名",
+    "messages": "messages",
+    "noDocumentSelected": "Please select a document first",
+    "pin": "置顶",
+    "unpin": "取消置顶"
+  },
+  "shortcuts": {
+    "title": "快捷键",
+    "reference": "快捷键参考",
+    "description": "键盘快捷键",
+    "search": "全局搜索",
+    "save": "保存",
+    "saveAll": "全部保存",
+    "newDocument": "新建文档",
+    "newProject": "新建项目",
+    "newFromTemplate": "从模板新建",
+    "importFile": "导入文件",
+    "closeDocument": "关闭文档",
+    "toggleSidebar": "切换侧边栏",
+    "toggleChat": "切换 AI 助手",
+    "toggleLayout": "切换布局",
+    "versionHistory": "版本历史",
+    "export": "导出",
+    "settings": "打开设置",
+    "pressKey": "按键",
+    "or": "或",
+    "catFile": "文件",
+    "catEdit": "编辑",
+    "catView": "视图",
+    "catTabs": "标签页",
+    "undo": "撤销",
+    "redo": "重做",
+    "cut": "剪切",
+    "copy": "复制",
+    "paste": "粘贴",
+    "selectAll": "全选",
+    "find": "查找",
+    "nextTab": "下一个标签",
+    "prevTab": "上一个标签",
+    "switchToTab": "切换到指定标签"
+  },
+  "tabs": {
+    "closeTab": "关闭标签",
+    "closeOtherTabs": "关闭其他标签",
+    "closeAllTabs": "关闭所有标签",
+    "unsavedChanges": "未保存的更改",
+    "unsavedConfirm": "\"{{title}}\" 有未保存的更改，是否保存后关闭？",
+    "saveAndClose": "保存并关闭",
+    "discardAndClose": "不保存",
+    "noOpenDocuments": "没有打开的文档",
+    "selectDocumentHint": "点击左侧文件树中的文档开始编辑",
+    "closeRightTabs": "关闭右侧标签",
+    "copyDocTitle": "复制文档标题",
+    "openDocInTree": "在文件树中点击文档打开",
+    "commonShortcuts": "{{mod}}+N 新建文档 · {{mod}}+S 保存 · {{mod}}+F 查找",
+    "versionHistory": "版本历史",
+    "moreFeaturesComing": "更多功能开发中..."
+  },
+  "projectPicker": {
+    "moveTitle": "移动文档到...",
+    "copyTitle": "复制文档到...",
+    "noDocument": "请先打开一个文档",
+    "noProjects": "没有其他项目可选，请先创建新项目",
+    "moveDesc": "将 \"{{title}}\" 移动到：",
+    "copyDesc": "复制 \"{{title}}\" 到：",
+    "cancel": "取消",
+    "processing": "处理中...",
+    "move": "移动",
+    "copy": "复制",
+    "moveSuccess": "文档 \"{{docTitle}}\" 已移动到项目 \"{{projectName}}\"",
+    "moveSuccessTitle": "移动成功",
+    "copySuccess": "文档 \"{{docTitle}}\" 已复制到项目 \"{{projectName}}\"",
+    "copySuccessTitle": "复制成功",
+    "operationFailed": "操作失败: {{error}}",
+    "errorTitle": "错误"
+  },
+  "findReplace": {
+    "find": "查找...",
+    "replaceWith": "替换为...",
+    "noMatch": "无匹配",
+    "replace": "替换",
+    "replaceAll": "全部替换",
+    "showReplace": "显示替换",
+    "hideReplace": "隐藏替换"
+  },
+  "statusBar": {
+    "lines": "行",
+    "words": "词",
+    "chars": "字符",
+    "selected": "选中",
+    "line": "行",
+    "col": "列",
+    "markdown": "Markdown"
+  },
+  "ai": {
+    "stopGeneration": "停止生成",
+    "adopt": "采纳",
+    "adoptToOriginal": "采纳正文内容到素材内容",
+    "replaceContent": "替换素材内容",
+    "appendContent": "追加到素材内容",
+    "testConnection": "测试连接",
+    "testing": "测试中...",
+    "connectionSuccess": "连接成功",
+    "connectionFailed": "连接失败",
+    "systemPrompt": "系统提示词",
+    "systemPromptHint": "自定义 AI 系统提示词，留空则不附加额外系统提示词",
+    "configureApiKey": "请先配置 API Key"
+  },
+  "errors": {
+    "general": "发生错误",
+    "network": "网络错误，请检查连接",
+    "fileNotFound": "文件未找到",
+    "saveFailed": "保存失败",
+    "loadFailed": "加载失败",
+    "deleteFailed": "删除失败",
+    "restoreFailed": "版本恢复失败",
+    "invalidInput": "无效输入",
+    "unauthorized": "未授权",
+    "quotaExceeded": "配额已超限",
+    "rateLimited": "请求过于频繁",
+    "aiError": "AI 服务错误",
+    "unknown": "未知错误"
+  },
+  "slides": {
+    "pptView": "PPT 视图",
+    "backToEditor": "返回编辑器",
+    "generatePpt": "生成 PPT",
+    "noSlides": "暂无幻灯片",
+    "generateHint": "点击\"生成 PPT\"按钮，AI 将根据文档内容自动生成幻灯片",
+    "slideCount": "幻灯片",
+    "newSlide": "新幻灯片",
+    "addSlide": "新增幻灯片",
+    "deleteSlide": "删除幻灯片",
+    "duplicate": "复制幻灯片",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "undo": "撤销",
+    "redo": "重做",
+    "edit": "编辑",
+    "preview": "预览",
+    "theme": "主题",
+    "selectTheme": "选择主题",
+    "editSlide": "编辑幻灯片",
+    "layout": "版式",
+    "title": "标题",
+    "titlePlaceholder": "幻灯片标题",
+    "subtitle": "副标题",
+    "subtitlePlaceholder": "副标题（可选）",
+    "contentBullets": "内容要点",
+    "addBulletPlaceholder": "添加要点...",
+    "speakerNotes": "演讲者备注",
+    "notesPlaceholder": "演讲者备注（可选）",
+    "promptDialogTitle": "生成 PPT",
+    "promptDialogDesc": "编辑提示词后点击生成，AI 将根据提示词创建幻灯片。",
+    "promptTemplate": "提示词模板",
+    "promptLabel": "PPT 提示词",
+    "promptPlaceholder": "描述你想要生成的 PPT 内容...",
+    "slideCountLabel": "建议页数",
+    "slideCountHint": "页（建议 8-15 页）",
+    "startGenerate": "开始生成",
+    "stopGenerate": "中断生成",
+    "templateManage": "管理模板",
+    "templateManagerTitle": "PPT 提示词模板管理",
+    "templateManagerDesc": "管理内置和自定义的 PPT 提示词模板。内置模板可复制为自定义模板后编辑。",
+    "templateNew": "新建模板",
+    "templateEdit": "编辑模板",
+    "templateAdd": "新建自定义模板",
+    "templateCustom": "自定义模板",
+    "templateBuiltin": "内置模板",
+    "templateBuiltinBadge": "内置",
+    "templatePages": "页",
+    "templateDeleteConfirm": "确认删除？",
+    "templateCopyEdit": "复制为自定义模板",
+    "templateDelete": "删除模板",
+    "templateName": "模板名称",
+    "templateTopic": "默认主题",
+    "templateDesc": "描述",
+    "templateSlideCount": "建议页数",
+    "templatePrompt": "提示词模板内容（可选，留空则自动生成）"
+  }
+}
