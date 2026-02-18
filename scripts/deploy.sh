@@ -17,6 +17,7 @@ mkdir -p "${TARGET_DIR}"
 rsync -av --delete \
   --exclude='node_modules' \
   --exclude='.git' \
+  --exclude='.github' \
   --exclude='.turbo' \
   --exclude='target' \
   --exclude='.DS_Store' \
