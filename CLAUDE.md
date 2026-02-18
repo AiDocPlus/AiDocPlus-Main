@@ -740,54 +740,95 @@ cjk = re.compile(r'[\u4e00-\u9fff]')
    git config --global --unset https.proxy
    ```
 
-## GitHub Actions CI/CD
+## 构建与发布
 
-### 工作流配置
+### 构建策略
 
-项目使用 `.github/workflows/build.yml` 进行跨平台构建。
+**核心规则：先构建本地 macOS 版本，成功后再上传并构建 Windows 版本。**
 
-**触发条件**：
-- 推送 `v*` 格式的 tag
-- 手动触发（workflow_dispatch）
+| 平台 | 构建方式 | 目标 | 产物 |
+|------|----------|------|------|
+| macOS (Apple Silicon) | **本地构建** | `aarch64-apple-darwin` | `.dmg` |
+| Windows x64 | **GitHub Actions 远端构建** | `x86_64-pc-windows-msvc` | `.exe` (NSIS) |
 
-**构建平台**：
-- macOS aarch64 (Apple Silicon)
-- Windows x64
-- Windows ARM64
+### Cargo Profile 优化
+
+`Cargo.toml` 配置了两套 profile：
+
+- **`[profile.dev]`**：本地测试用，`incremental = true`，`opt-level = 0`，依赖库 `opt-level = 1`（避免运行太慢）
+- **`[profile.release]`**：发布用，`lto = "thin"`，`opt-level = 2`，`strip = true`，`codegen-units = 1`
+
+本地测试构建用 `--debug` 加速：
+```bash
+cd apps/desktop && pnpm tauri build --debug --target aarch64-apple-darwin
+```
+
+正式发布构建（release profile）：
+```bash
+cd apps/desktop && pnpm tauri build --target aarch64-apple-darwin
+```
 
 ### 发布新版本流程
 
 ```bash
-# 1. 更新版本号
-# - apps/desktop/src-tauri/tauri.conf.json
-# - apps/desktop/package.json
+# 1. 总装最新代码
+bash AiDocPlus-Main/scripts/assemble.sh
 
-# 2. 提交更改
-git add -A && git commit -m "chore: 更新版本号至 x.x.x"
-git push origin main
+# 2. 本地构建 macOS 版本（必须先成功）
+cd AiDocPlus/apps/desktop && pnpm tauri build --target aarch64-apple-darwin
 
-# 3. 创建并推送 tag
-git tag vx.x.x
-git push origin vx.x.x
+# 3. 提交推送所有仓库的修改
+# （各资源仓库 + AiDocPlus 主仓库）
+
+# 4. 触发远端 Windows 构建
+gh workflow run build.yml --ref main
+# 或通过 tag 触发：
+git tag -f vx.x.x && git push origin vx.x.x --force
+
+# 5. 等待构建完成后发布
+gh run list --workflow=build.yml --limit 1
+# Draft Release 自动创建，手动设为 Latest 发布
 ```
+
+### GitHub Actions CI/CD
+
+#### 工作流配置（`.github/workflows/build.yml`）
+
+**仅构建 Windows x64**，macOS 由本地构建。
+
+**触发条件**：
+- 推送 `v*` 格式的 tag
+- 手动触发（`workflow_dispatch`）
+
+**CI 构建流程**：
+1. Checkout 所有 8 个仓库（AiDocPlus 组织下）到同级目录
+2. 安装工具链（Python 3、Node.js 20、pnpm 10、Rust stable）
+3. 总装：AiDocPlus-Main 用纯 bash `find + cp` 替代 `rsync`（Windows 无 rsync），其余资源仓库运行各自的 `build.sh` + `deploy.sh`
+4. `pnpm install` + `tauri-apps/tauri-action` 构建 `x86_64-pc-windows-msvc`
+5. 自动创建 Draft Release 并上传安装包
+
+**环境变量**（解决 Windows Python 编码问题）：
+```yaml
+env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUTF8: '1'
+```
+
+**所有仓库已公开**，无需 `REPO_PAT`，使用默认 `GITHUB_TOKEN`。
+
+### 脚本跨平台兼容性规范
+
+所有 `build.py` 和 `deploy.sh` 脚本必须遵守以下规范，确保在 Windows CI（Git Bash）上正常运行：
+
+1. **禁止 emoji**：Python `print()` 和 bash `echo` 中不得使用 emoji 字符（Windows `cp1252` 编码会报 `UnicodeEncodeError`），使用 `[build]`、`[ok]`、`[done]`、`[warn]`、`[skip]` 等文本标签替代
+2. **禁止 `python3 -c` 内联脚本处理文件路径**：Git Bash 路径格式（`/d/a/...`）Python 无法识别，改用 `grep` + `sed` 等纯 bash 工具
+3. **禁止 `rsync`**：Windows 无 rsync，CI 中 AiDocPlus-Main 部署使用 `find + cp` 替代
+4. **`deploy.sh` 中的箭头符号**：使用 `->` 替代 `→`（Unicode 箭头）
 
 ### 重要经验教训
 
-1. **pnpm 版本冲突**：不要在 GitHub Actions 中硬编码 pnpm 版本，让 `pnpm/action-setup@v4` 自动从 `package.json` 的 `packageManager` 字段读取
-   ```yaml
-   # 错误 ❌
-   - uses: pnpm/action-setup@v4
-     with:
-       version: 9
-
-   # 正确 ✅
-   - uses: pnpm/action-setup@v4
-   ```
-
-2. **重复的工作流运行**：确保 `.github/workflows/` 目录下只有一个工作流文件监听相同事件，否则会触发多次构建
-
-3. **私有仓库权限**：
-   - 需要 `permissions: contents: write` 才能创建 Release
-   - 检出私有仓库需要使用 `persist-credentials: false` 或配置 PAT
-
-4. **外部插件仓库集成**：构建时需要从 `AiDocPlus/AiDocPlus-Plugins` 检出并部署插件到主程序
+1. **pnpm 版本**：GitHub Actions 中使用 `pnpm/action-setup@v4` 并指定 `version: 10`
+2. **重复的工作流运行**：确保 `.github/workflows/` 目录下只有一个工作流文件监听相同事件
+3. **权限**：需要 `permissions: contents: write` 才能创建 Release
+4. **AiDocPlus-Main deploy.sh**：`rsync --delete` 必须排除 `.github` 目录，防止 `build.yml` 被覆盖
+5. **Draft Release 发布**：通过 API 从 Draft 转正式发布时，需手动设置 `make_latest=true`，否则不会标记为 Latest
