@@ -25,7 +25,7 @@ rsync -av --delete \
   --exclude='.claude' \
   --exclude='scripts/deploy.sh' \
   --exclude='pnpm-lock.yaml' \
-  --exclude='packages/shared-types/src/generated/*.generated.ts' \
+  --exclude='packages/shared-types/src/generated' \
   --exclude='apps/desktop/src-tauri/bundled-resources' \
   --exclude='apps/desktop/src-ui/src/plugins/*/'\
   "${MAIN_DIR}/" "${TARGET_DIR}/"

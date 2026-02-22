@@ -57,7 +57,9 @@ AiDocPlus/
 │       │   ├── bundled-resources/  # 外部化资源数据（由各资源仓库 deploy.sh 部署，.gitignore 忽略）
 │       │   │   ├── ai-providers/          # AI 提供商 manifest
 │       │   │   ├── document-templates/    # 文档模板分类 + PPT 主题
-│       │   │   └── project-templates/     # 项目模板分类 + 内置模板
+│       │   │   ├── project-templates/     # 项目模板分类 + 内置模板
+│       │   │   ├── prompt-templates/      # 提示词模板（每个分类一个 JSON 文件，运行时动态加载）
+│       │   │   └── managers/              # 6 个资源管理器 .app（macOS）/ .exe（Windows）
 │       │   └── Cargo.toml
 │       └── src-ui/          # React 前端
 │           ├── src/
@@ -118,20 +120,36 @@ AiDocPlus/
 - **插件系统**：全外部插件架构（21 个插件，独立仓库 [AiDocPlus-Plugins](https://github.com/AiDocPlus/AiDocPlus-Plugins)），自注册 + 自动发现 + manifest 驱动
 - **资源外部化**：角色、提示词模板、AI 提供商、文档模板、项目模板等资源数据全部外部化到独立仓库，通过构建流水线自动生成 TypeScript 文件并部署
 - **内置项目模板**：20 个预设文档模板（学术、商务、技术、创意、教育、政务、通用 7 大类），从 bundled-resources 自动加载
+- **文档标签与收藏**：文档可添加自定义标签，支持收藏（星标），文件树按标签筛选/按收藏筛选，编辑器工具栏内联标签编辑器（TagEditor）
 
 ### 运行命令
 
-#### 开发模式
+#### 开发模式（直接在源码目录运行）
 ```bash
-# 从桌面应用目录（推荐）
-cd apps/desktop
+# 在 AiDocPlus-Main 源码目录直接运行（推荐，利用增量编译缓存）
+cd AiDocPlus-Main/apps/desktop
 pnpm tauri dev
 ```
 Tauri dev 模式下修改 Rust 文件会自动重新编译并重启后端，前端由 Vite 热更新。
 
-#### 构建
+**外部资源通过符号链接引用**（首次需手动创建）：
 ```bash
-cd apps/desktop
+# generated TS 文件（角色、模板、AI 提供商等）
+ln -s /path/to/AiDocPlus/packages/shared-types/src/generated /path/to/AiDocPlus-Main/packages/shared-types/src/generated
+
+# bundled-resources（Rust 端内置资源）
+ln -s /path/to/AiDocPlus/apps/desktop/src-tauri/bundled-resources /path/to/AiDocPlus-Main/apps/desktop/src-tauri/bundled-resources
+```
+
+**插件双目标部署**：`AiDocPlus-Plugins/scripts/deploy.sh` 自动将插件同时部署到 `AiDocPlus/`（构建目标）和 `AiDocPlus-Main/`（开发目录），无需手动复制。
+
+#### 总装验证（发布前）
+```bash
+# 总装所有资源仓库到构建目标
+bash AiDocPlus-Main/scripts/assemble.sh
+
+# 在构建目标验证完整构建
+cd AiDocPlus/apps/desktop
 pnpm tauri build
 ```
 
@@ -156,19 +174,20 @@ AiDocPlus 采用多仓库架构，将大量硬编码资源数据外部化到独�
 |------|------|----------|
 | **AiDocPlus-Main** | 主程序源码仓库 | — |
 | **AiDocPlus-Roles** | 内置角色（system prompt） | 10 个角色 |
-| **AiDocPlus-PromptTemplates** | 提示词模板 | 225 个模板 |
+| **AiDocPlus-PromptTemplates** | 提示词模板（JSON 文件模式） | 982 个模板（46 分类） |
 | **AiDocPlus-AIProviders** | AI 服务提供商配置 | 13 个提供商 |
 | **AiDocPlus-DocTemplates** | PPT 主题 + 文档模板分类 | 8 主题 + 8 分类 |
 | **AiDocPlus-ProjectTemplates** | 项目模板分类 + 内置模板 | 7 分类 + 20 模板 |
 | **AiDocPlus-Plugins** | 外部插件 | 21 个插件 |
+| **AiDocPlus-ResourceManager** | 资源管理器工具集（6 个独立 Tauri 桌面应用） | 6 个管理器 |
 | **AiDocPlus**（构建目标） | 总装构建目标目录 | — |
 
 每个资源仓库的目录结构：
 ```
 AiDocPlus-{Resource}/
-├── data/                    # 资源数据（manifest.json + content 文件）
-│   ├── _meta.json           # 分类定义
-│   └── {category}/{id}/     # 每个资源一个目录
+├── data/                    # 资源数据
+│   ├── _meta.json           # 分类定义（目录模式仓库）
+│   └── {category}/{id}/     # 每个资源一个目录（目录模式）
 │       ├── manifest.json
 │       └── content.md / content.json / system-prompt.md
 ├── scripts/
@@ -178,6 +197,19 @@ AiDocPlus-{Resource}/
 │   └── extract_from_source.js  # 一次性提取脚本（从 index.ts 提取原始数据）
 ├── dist/                    # 构建产物（.gitignore 忽略）
 └── .gitignore
+```
+
+**例外：AiDocPlus-PromptTemplates 使用 JSON 文件模式**（非目录模式）：
+```
+AiDocPlus-PromptTemplates/
+├── data/                    # 每个分类一个 JSON 文件
+│   ├── academic.json        # {key, name, icon, order, templates: [{id, name, description, content, variables, order}]}
+│   ├── business.json
+│   └── ...                  # 共 46 个分类 JSON 文件（982 个模板）
+├── scripts/
+│   ├── build.py             # 读取 data/*.json 生成 dist/*.generated.ts
+│   └── deploy.sh            # 复制 JSON 到 bundled-resources + generated TS 到 shared-types
+└── dist/
 ```
 
 ### 构建流水线
@@ -197,6 +229,12 @@ Main → Roles → PromptTemplates → DocTemplates → ProjectTemplates → AIP
 - `packages/shared-types/src/generated/*.generated.ts`
 - `apps/desktop/src-tauri/bundled-resources`
 - `apps/desktop/src-ui/src/plugins/*/`
+
+**插件双目标部署**：`AiDocPlus-Plugins/scripts/deploy.sh` 同时部署到两个目标：
+- `AiDocPlus/apps/desktop/src-ui/src/plugins/` — 构建目标（用于 `tauri build`）
+- `AiDocPlus-Main/apps/desktop/src-ui/src/plugins/` — 开发目录（用于 `tauri dev`）
+
+SDK 文件（`_framework/`、`types.ts` 等）不会被插件 deploy.sh 部署，它们由主程序维护。
 
 ### index.ts 外部化映射
 
@@ -219,6 +257,13 @@ Main → Roles → PromptTemplates → DocTemplates → ProjectTemplates → AIP
   - `list_templates()` — 合并用户模板（`~/AiDocPlus/Templates/`）+ bundled-resources 内置模板，用户优先、ID 去重
   - `get_template_content()` — 先查用户目录，再查 `bundled-resources/project-templates/`
   - `default_categories()` — 优先从 `bundled-resources/document-templates/_meta.json` 读取，硬编码作为 fallback
+- **commands/resource.rs**：
+  - `list_prompt_templates()` — 读取 `bundled-resources/prompt-templates/*.json`（分类 JSON 文件）+ `~/AiDocPlus/PromptTemplates/custom.json`（用户自定义），返回合并的 `PromptTemplateInfo` 列表
+  - `list_prompt_template_categories()` — 从各分类 JSON 文件中提取分类信息（key, name, icon），按 `order` 字段排序
+  - `save_custom_prompt_template()` / `delete_custom_prompt_template()` — 用户自定义模板 CRUD（操作 `~/AiDocPlus/PromptTemplates/custom.json`）
+  - `export_custom_prompt_templates()` / `import_custom_prompt_templates()` — JSON 格式导入导出
+  - `open_resource_manager(managerName)` — 启动资源管理器（提示词模板管理器传入 `bundled-resources/prompt-templates/` 作为 `--data-dir`，其他管理器传入 `~/AiDocPlus/<type>/`）
+  - `find_prompt_templates_dir()` — 兼容 dev/release 模式的路径查找
 - **Cargo.toml**：新增 `rusqlite`（bundled）+ `sha2` 依赖
 
 ### 内置项目模板（20 个）
@@ -260,6 +305,138 @@ cd apps/desktop/src-ui && npx tsc --noEmit
 cd apps/desktop/src-tauri && cargo check
 ```
 
+## 资源管理器工具集（AiDocPlus-ResourceManager）
+
+### 概述
+
+**AiDocPlus-ResourceManager** 是一个独立的 monorepo 项目（`/Users/jdh/Code/AiDocPlus-ResourceManager`），包含 6 个独立的 Tauri 2 桌面应用，用于可视化管理各类资源仓库的数据。每个管理器提供资源的 CRUD、分类管理、导入导出、批量操作和 AI 辅助生成功能。
+
+### 项目结构
+
+```
+AiDocPlus-ResourceManager/
+├── packages/
+│   ├── manager-shared/     # 共享 TypeScript 类型定义（ResourceTypeConfig、ManifestBase、EditorPanelProps 等）
+│   ├── manager-rust/       # 共享 Rust crate（Tauri commands：资源 CRUD、分类、导入导出、AI 生成）
+│   └── manager-ui/         # 共享 React 组件库（ManagerApp、ManagerLayout、SearchBar、CategoryTree、ResourceList、CommonFieldsEditor）
+│       └── src/
+│           ├── components/  # UI 组件
+│           ├── stores/      # Zustand 状态管理（useResourceStore）
+│           ├── hooks/       # 业务 hooks（useResources、useCategories、useAIGenerate）
+│           └── i18n/        # 中英文翻译（zh.json、en.json）
+├── apps/
+│   ├── roles-manager/           # 角色管理器
+│   ├── ai-providers-manager/    # AI 服务商管理器
+│   ├── prompt-templates-manager/# 提示词模板管理器
+│   ├── project-templates-manager/# 项目模板管理器
+│   ├── doc-templates-manager/   # 文档模板管理器
+│   └── plugins-manager/        # 插件管理器
+├── Cargo.toml              # Cargo workspace（共享编译缓存）
+├── pnpm-workspace.yaml     # pnpm workspace: ['packages/*', 'apps/*']
+└── package.json            # 根 package.json（含 dev:xxx 便捷脚本）
+```
+
+每个管理器应用的结构：
+```
+apps/{name}/
+├── package.json            # pnpm workspace 包（含 @tauri-apps/cli）
+├── src-tauri/              # Rust 后端
+│   ├── Cargo.toml          # 依赖 aidocplus-manager-rust
+│   ├── src/main.rs         # Tauri 入口，注册 manager-rust commands
+│   └── tauri.conf.json     # Tauri 配置（窗口、端口、图标）
+└── src-ui/                 # React 前端
+    ├── vite.config.ts
+    ├── tsconfig.json
+    └── src/
+        ├── main.tsx
+        ├── App.tsx          # 使用 ManagerApp + 管理器专属 config
+        ├── config.ts        # ResourceTypeConfig 定义（资源类型、字段、AI 提示词）
+        └── panels/          # 自定义编辑面板（如 RoleEditor、AIProviderEditor）
+```
+
+### 技术栈
+
+- **前端**: React 19 + TypeScript 5.9 + Tailwind CSS 4 + Zustand + i18next + Vite 7
+- **后端**: Rust + Tauri 2（plugins: shell, dialog, fs）
+- **构建**: pnpm workspace + Cargo workspace + Vite 7
+- **共享**: manager-shared（类型）、manager-rust（Rust 逻辑）、manager-ui（UI 组件）
+
+### 6 个管理器
+
+| 管理器 | 端口 | 目标资源仓库 | 自定义编辑面板 |
+|--------|------|-------------|---------------|
+| roles-manager | 1420 | AiDocPlus-Roles | RoleEditor（system-prompt.md、i18n） |
+| ai-providers-manager | 1421 | AiDocPlus-AIProviders | AIProviderEditor（baseUrl、models、capabilities） |
+| prompt-templates-manager | 1422 | AiDocPlus-PromptTemplates | PromptTemplateEditor（JSON 文件模式，直接编辑分类 JSON） |
+| project-templates-manager | 1423 | AiDocPlus-ProjectTemplates | ProjectTemplateEditor（content.json、roles） |
+| doc-templates-manager | 1424 | AiDocPlus-DocTemplates | DocTemplateEditor（文档模板/PPT 主题双模式） |
+| plugins-manager | 1425 | AiDocPlus-Plugins | PluginEditor（type、roles、manifest 元数据） |
+
+### 共享包说明
+
+#### manager-shared
+TypeScript 类型定义：`ResourceTypeConfig`、`ManifestBase`、`EditorPanelProps`、`ResourceChanges`、`CategoryDefinition`、`ContentFileSpec`、`FieldDefinition`、`AIGenerateConfig`、`BatchOperation` 等 20+ 接口。
+
+#### manager-rust
+Rust crate 提供 Tauri commands：
+- **资源 CRUD**：`list_resources`、`get_resource`、`save_resource`、`create_resource`、`delete_resource`、`reorder_resources`
+- **分类管理**：`load_categories`、`save_categories`
+- **导入导出**：`import_resources`（ZIP）、`export_resources`（ZIP）
+- **批量操作**：`batch_update`
+- **AI 生成**：`ai_generate`（非流式）、`ai_generate_stream`（SSE 流式）
+- **构建脚本**：`run_build_script`
+- **AI 配置**：`load_ai_config`、`save_ai_config`
+
+#### manager-ui
+React 组件库：
+- `ManagerApp` — 主应用组件（集成所有子组件和 hooks）
+- `ManagerLayout` — 三栏布局（工具栏 + 分类树 + 资源列表 + 编辑器）
+- `SearchBar` — 搜索栏（绑定 store 的 searchQuery）
+- `CategoryTree` — 分类树（支持子分类、计数、选中状态）
+- `ResourceList` — 资源列表（筛选、选中、复选框）
+- `CommonFieldsEditor` — 通用字段编辑器（id、name、description、icon、tags 等）
+- `useResourceStore` — Zustand 状态管理（资源列表、分类、选中、搜索、加载状态）
+- `useResources` / `useCategories` / `useAIGenerate` — 业务 hooks
+
+### 运行命令
+
+```bash
+# 从根目录启动某个管理器
+cd /Users/jdh/Code/AiDocPlus-ResourceManager
+pnpm dev:roles
+pnpm dev:ai-providers
+pnpm dev:prompt-templates
+pnpm dev:project-templates
+pnpm dev:doc-templates
+pnpm dev:plugins
+
+# 或从管理器目录启动
+cd apps/roles-manager && pnpm tauri dev
+
+# Cargo workspace 全量检查
+cargo check --workspace
+
+# 安装依赖
+pnpm install
+```
+
+### 关键配置细节
+
+- **Cargo workspace**（根目录 `Cargo.toml`）：所有 6 个管理器 + manager-rust 共享 `target/` 编译缓存
+- **pnpm workspace**：`packages: ['packages/*', 'apps/*']`，`package.json` 在 `apps/{name}/` 层级
+- **tauri.conf.json** 中 `beforeDevCommand`：`npx vite src-ui`（从项目根运行 vite 指向 src-ui 子目录）
+- **tauri.conf.json** 中 `beforeBuildCommand`：`npx vite build src-ui`
+- 每个管理器使用不同端口（1420-1425），避免并行开发时冲突
+
+### 添加新管理器
+
+1. 复制现有管理器目录（如 `apps/roles-manager/`）
+2. 修改 `package.json`（name）、`tauri.conf.json`（productName、identifier、端口）、`Cargo.toml`（name）
+3. 创建专属 `config.ts`（`ResourceTypeConfig`）和自定义编辑面板
+4. 在根 `Cargo.toml` 的 `members` 中添加新路径
+5. 在根 `package.json` 中添加 `dev:xxx` 脚本
+6. `pnpm install` + `pnpm tauri dev` 验证
+
 ## Architecture Notes
 
 ### AI 流式生成机制
@@ -269,6 +446,53 @@ cd apps/desktop/src-tauri && cargo check
 - 前端使用 `streamSessionId`（模块级变量）+ `streamAborted` 标志双重保护
 - `stopAiStreaming()` 同时：递增 sessionId、移除事件监听、通知后端中断 HTTP 流
 - 聊天和内容生成共用同一套流式机制和停止逻辑
+
+### 提示词模板架构（JSON 文件模式）
+
+提示词模板采用 **JSON 文件模式**，每个分类一个 JSON 文件，替代了旧的目录结构（`_meta.json` + `{category}/{id}/manifest.json + content.md`）。
+
+#### 数据格式
+
+- **内置模板**：`bundled-resources/prompt-templates/*.json`，每个文件格式：
+  ```json
+  {"key": "academic", "name": "学术写作", "icon": "🎓", "order": 7, "templates": [{"id": "...", "name": "...", "description": "...", "content": "...", "variables": [], "order": 0}]}
+  ```
+- **用户自定义模板**：`~/AiDocPlus/PromptTemplates/custom.json`，格式：
+  ```json
+  {"templates": [{"id": "...", "name": "...", "category": "...", "description": "...", "content": "...", "variables": []}]}
+  ```
+
+#### 数据流
+
+```
+编译时（fallback）：build.py 读取 data/*.json → prompt-templates.generated.ts + template-categories.generated.ts
+运行时（优先）：    Rust list_prompt_templates() → 读取 bundled-resources/*.json + custom.json → invoke → useTemplatesStore
+```
+
+#### 关键文件
+
+| 文件 | 作用 |
+|------|------|
+| `src-tauri/src/commands/resource.rs` | `list_prompt_templates()` 读取分类 JSON + custom.json；`list_prompt_template_categories()` 按 order 排序；自定义模板 CRUD |
+| `src-ui/src/stores/useTemplatesStore.ts` | `loadBuiltInTemplates()` + `loadBuiltInCategories()` 运行时加载；自定义模板异步保存到 Rust 后端 |
+| `src-ui/src/components/templates/PromptTemplates.tsx` | 对话框打开时刷新；窗口获得焦点时自动重新加载（管理器修改后切回即时生效）；预览面板随 `allTemplates` 变化自动同步 |
+
+#### 加载优先级
+
+1. **运行时加载**（Rust 读取 JSON 文件）— 优先使用，确保管理器修改实时生效
+2. **静态 fallback**（`BUILT_IN_TEMPLATES`）— Rust 加载失败时回退到编译时常量
+3. **用户自定义模板**（Rust 后端 `custom.json`）— 始终合并
+
+#### useTemplatesStore 数据合并策略
+
+- `templates` = 运行时内置模板（`isBuiltIn: true`）+ 用户自定义模板（`isBuiltIn: false`，存储在 `~/AiDocPlus/PromptTemplates/custom.json`）
+- `builtInCategories` = 运行时加载的分类（优先）；为空时回退到 `TEMPLATE_CATEGORIES` 静态常量
+- `getAllCategories()` = `builtInCategories`（或 fallback）+ `customCategories`
+
+### 提示词模板选择对话框（PromptTemplates.tsx）
+
+三栏布局：分类栏 | 模板列表 | 预览区，支持搜索、分类筛选、键盘快捷键（Escape 关闭、Enter 选择）。
+窗口获得焦点时自动刷新数据（从管理器切回后即时生效），预览面板通过 `useEffect([allTemplates])` 自动同步最新内容。
 
 ### 插件体系操作规范（强制）
 
@@ -391,6 +615,11 @@ const ALLOWED_PLUGIN_COMMANDS = new Set([
   'open_file_with_app',     // 用系统应用打开文件
   'test_smtp_connection',   // 测试 SMTP 连接
   'send_email',             // 发送邮件
+  'check_pandoc',           // 检测 Pandoc 是否安装及版本
+  'pandoc_export',          // 调用 Pandoc 导出文档
+  'list_versions',          // 列出文档版本
+  'get_version',            // 获取指定版本详情
+  'wechat_http_request',    // 微信公众号通用 HTTP 请求
 ]);
 ```
 
@@ -493,7 +722,7 @@ interface DocumentPlugin {
 2. 创建 `manifest.json`（包含 UUID、名称、分类等元数据）
 3. 创建 `index.ts`：定义 `DocumentPlugin` 对象，从 `manifest.json` 读取 UUID，调用 `registerPlugin()` 自注册
 4. 实现 `{Name}PluginPanel.tsx` 面板组件
-5. 创建 `i18n/{zh,en,ja}.json` 翻译文件
+5. 创建 `i18n/{zh,en}.json` 翻译文件
 6. 运行 `pnpm typecheck` 验证类型
 7. 运行 `pnpm deploy` 部署到主程序
 
@@ -543,11 +772,11 @@ interface DocumentPlugin {
 - `PluginPromptBuilderDialog.tsx` — 提示词构造器弹窗壳
 - `ui.ts` — UI 原语 re-export 层（插件从此处 import UI 组件）
 - `pluginUtils.ts` — 工具函数（truncateContent 等）
-- `i18n/{zh,en,ja}.json` — 框架层翻译
+- `i18n/{zh,en}.json` — 框架层翻译
 
 #### 插件 i18n
 
-每个插件自带翻译文件（`{plugin}/i18n/{zh,en,ja}.json`），通过 `registerPluginI18n` 注册到 i18next 命名空间（如 `plugin-summary`）。框架层翻译在 `plugins/_framework/i18n/` 中，命名空间为 `plugin-framework`。
+每个插件自带翻译文件（`{plugin}/i18n/{zh,en}.json`），通过 `registerPluginI18n` 注册到 i18next 命名空间（如 `plugin-summary`）。框架层翻译在 `plugins/_framework/i18n/` 中，命名空间为 `plugin-framework`。
 
 #### 当前插件（21 个，全部为外部插件）
 
@@ -580,6 +809,19 @@ interface DocumentPlugin {
 
 - AI 流式状态通过 `aiStreamingTabId` 跟踪，确保只在对应标签页显示生成状态
 - 每个标签页有独立的聊天消息（`aiMessagesByTab`）和面板状态
+
+### 文档标签与收藏
+
+- **数据模型**：`DocumentMetadata.tags: string[]`，标签存储在文档 metadata 中
+- **内部标签**：以 `_` 开头的标签为内部标签（如 `_starred` 表示收藏），UI 中自动过滤不显示
+- **Rust 后端命令**（`commands/document.rs`）：
+  - `update_document_tags(projectId, documentId, tags)` — 更新文档标签
+  - `list_all_tags(projectId)` — 获取项目内所有已使用标签（去重）
+  - `toggle_document_starred(projectId, documentId)` — 切换收藏状态（添加/移除 `_starred` 标签）
+- **前端 Store**（`useAppStore`）：`updateDocumentTags`、`loadAllTags`、`toggleDocumentStarred`、`allTags`、`documentFilterTag`、`setDocumentFilterTag`
+- **UI 组件**：
+  - `FileTree.tsx`：标签筛选下拉菜单（Filter 图标）、收藏星标显示、收藏切换按钮
+  - `TagEditor.tsx`：内联标签编辑器（添加/删除标签，自动补全已有标签），集成在 `EditorPanel` 工具栏
 
 ### 文档保存
 

@@ -4,7 +4,7 @@ import { getActiveRole } from '@aidocplus/shared-types';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { save, open } from '@tauri-apps/plugin-dialog';
-import { getAIInvokeParams, useSettingsStore } from '@/stores/useSettingsStore';
+import { getAIInvokeParamsForService, useSettingsStore } from '@/stores/useSettingsStore';
 import { usePluginStorageStore } from '@/stores/usePluginStorageStore';
 import { getFragmentsGroupedByPlugin } from '../fragments';
 import { parseThinkTags } from '@/utils/thinkTagParser';
@@ -60,6 +60,9 @@ const ALLOWED_PLUGIN_COMMANDS = new Set([
   // 版本管理（版本时间线插件）
   'list_versions',          // 列出文档版本
   'get_version',            // 获取指定版本详情
+
+  // 微信公众号（通用 HTTP 请求）
+  'wechat_http_request',    // 通用 HTTP 请求（支持 JSON + multipart）
 ]);
 
 /**
@@ -391,7 +394,7 @@ export function createPluginHostAPI(opts: CreatePluginHostAPIOptions): PluginHos
 
   const ai: AIAPI = {
     chat: async (messages, options) => {
-      const aiParams = getAIInvokeParams();
+      const aiParams = getAIInvokeParamsForService(opts.getDocument().aiServiceId);
       // 通知宿主：开始新的 AI 调用，清空思考内容
       lastThinking = '';
       opts.onThinkingUpdate?.('');
@@ -399,7 +402,7 @@ export function createPluginHostAPI(opts: CreatePluginHostAPIOptions): PluginHos
       const rawResult = await invoke<string>('chat', {
         messages: injectRolePrompt(messages),
         ...aiParams,
-        maxTokens: options?.maxTokens ?? 4096,
+        maxTokens: options?.maxTokens || undefined,
       });
 
       // 自动过滤 <think> 标签
@@ -411,7 +414,7 @@ export function createPluginHostAPI(opts: CreatePluginHostAPIOptions): PluginHos
       return parsed.content;
     },
     chatStream: async (messages, onChunk, options) => {
-      const aiParams = getAIInvokeParams();
+      const aiParams = getAIInvokeParamsForService(opts.getDocument().aiServiceId);
       const requestId = `plugin_${pluginId}_${Date.now()}`;
 
       // 通知宿主：开始新的 AI 调用，清空思考内容
@@ -467,7 +470,7 @@ export function createPluginHostAPI(opts: CreatePluginHostAPIOptions): PluginHos
         await invoke<string>('chat_stream', {
           messages: injectRolePrompt(messages),
           ...aiParams,
-          maxTokens: options?.maxTokens ?? 4096,
+          maxTokens: options?.maxTokens,
           requestId,
         });
 
@@ -485,7 +488,7 @@ export function createPluginHostAPI(opts: CreatePluginHostAPIOptions): PluginHos
       }
     },
     isAvailable: () => {
-      const aiParams = getAIInvokeParams();
+      const aiParams = getAIInvokeParamsForService(opts.getDocument().aiServiceId);
       return !!(aiParams.provider && aiParams.apiKey && aiParams.model);
     },
     truncateContent: (text: string) => {
