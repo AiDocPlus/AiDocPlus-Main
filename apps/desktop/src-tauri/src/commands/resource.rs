@@ -111,40 +111,37 @@ pub fn open_resource_manager(managerName: String) -> Result<(), String> {
     let managers_dir = crate::paths::bundled_sub_dir("managers")
         .ok_or_else(|| "未找到 bundled-resources/managers 目录".to_string())?;
 
-    // 计算用户数据目录：~/AiDocPlus/<resource-type>/
-    // 管理器名称 → 资源子目录映射
-    let resource_subdir = match managerName.as_str() {
-        "提示词模板管理器" => "PromptTemplates",
-        "项目模板管理器" => "ProjectTemplates",
-        "文档模板管理器" => "DocTemplates",
-        "角色管理器" => "Roles",
-        "AI服务商管理器" => "AIProviders",
-        "插件管理器" => "Plugins",
-        _ => "",
+    // 管理器名称 → 资源类型标识映射（统一管理器使用 --resource-type 参数）
+    let resource_type = match managerName.as_str() {
+        "提示词模板管理器" => "prompt-templates",
+        "项目模板管理器" => "project-templates",
+        "文档模板管理器" => "doc-templates",
+        "角色管理器" => "roles",
+        "AI服务商管理器" => "ai-providers",
+        "插件管理器" => "plugins",
+        _ => return Err(format!("未知管理器: {}", managerName)),
     };
-    // 提示词模板管理器使用 JSON 文件模式，data-dir 应指向 bundled-resources/prompt-templates/
-    // 其他管理器使用目录模式，data-dir 指向 ~/AiDocPlus/<resource-type>/
-    let data_dir = if managerName == "提示词模板管理器" {
+
+    // 提示词模板使用 JSON 文件模式，data-dir 指向 bundled-resources/prompt-templates/
+    // 其他资源类型的 data-dir 由统一管理器自行计算（~/AiDocPlus/<type>/）
+    let data_dir = if resource_type == "prompt-templates" {
         find_prompt_templates_dir()
-    } else if !resource_subdir.is_empty() {
-        let home = dirs::home_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
-        let dir = home.join("AiDocPlus").join(resource_subdir);
-        let _ = std::fs::create_dir_all(&dir);
-        Some(dir)
     } else {
         None
     };
 
     #[cfg(target_os = "macos")]
     {
-        let app_path = managers_dir.join(format!("{}.app", managerName));
+        let app_path = managers_dir.join("资源管理器.app");
         if !app_path.exists() {
             return Err(format!("管理器未找到: {}", app_path.display()));
         }
         let mut cmd = std::process::Command::new("open");
-        cmd.arg("-a").arg(&app_path);
+        cmd.arg("-a").arg(&app_path)
+            .arg("--args")
+            .arg("--resource-type").arg(resource_type);
         if let Some(ref dir) = data_dir {
-            cmd.arg("--args").arg("--data-dir").arg(dir);
+            cmd.arg("--data-dir").arg(dir);
         }
         cmd.spawn()
             .map_err(|e| format!("启动管理器失败: {}", e))?;
@@ -152,21 +149,12 @@ pub fn open_resource_manager(managerName: String) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     {
-        // Windows 上 exe 文件名基于 Cargo package.name（英文），不是 productName（中文）
-        let exe_name = match managerName.as_str() {
-            "提示词模板管理器" => "prompt-templates-manager.exe",
-            "项目模板管理器" => "project-templates-manager.exe",
-            "文档模板管理器" => "doc-templates-manager.exe",
-            "角色管理器" => "roles-manager.exe",
-            "AI服务商管理器" => "ai-providers-manager.exe",
-            "插件管理器" => "plugins-manager.exe",
-            _ => return Err(format!("未知管理器: {}", managerName)),
-        };
-        let exe_path = managers_dir.join(exe_name);
+        let exe_path = managers_dir.join("resource-manager.exe");
         if !exe_path.exists() {
             return Err(format!("管理器未找到: {}", exe_path.display()));
         }
         let mut cmd = std::process::Command::new(&exe_path);
+        cmd.arg("--resource-type").arg(resource_type);
         if let Some(ref dir) = data_dir {
             cmd.arg("--data-dir").arg(dir);
         }
@@ -176,11 +164,12 @@ pub fn open_resource_manager(managerName: String) -> Result<(), String> {
 
     #[cfg(target_os = "linux")]
     {
-        let exe_path = managers_dir.join(&managerName);
+        let exe_path = managers_dir.join("resource-manager");
         if !exe_path.exists() {
             return Err(format!("管理器未找到: {}", exe_path.display()));
         }
         let mut cmd = std::process::Command::new(&exe_path);
+        cmd.arg("--resource-type").arg(resource_type);
         if let Some(ref dir) = data_dir {
             cmd.arg("--data-dir").arg(dir);
         }
