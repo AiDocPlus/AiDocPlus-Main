@@ -1,112 +1,138 @@
-# AiDocPlus - AI Document Editor
+# AiDocPlus-Main
 
-A cross-platform AI document editor built with Tauri and React.
+**AiDocPlus 主程序源码仓库** — AI 驱动的跨平台文档桌面编辑器
 
-Official Website: https://aidocplus.com
+> 这是开发仓库。如需下载安装包，请前往 [AiDocPlus](https://github.com/AiDocPlus/AiDocPlus/releases)。
 
-## Status
-
-✅ **Initial Implementation Complete**
-
-The project has been successfully set up with the following features:
-
-### Implemented Features
-
-#### Core Architecture
-- ✅ **Monorepo Structure**: Turborepo-based monorepo with shared packages
-- ✅ **Tauri 2.x Backend**: Rust backend with all IPC commands
-- ✅ **React 19 Frontend**: TypeScript frontend with modern tooling
-- ✅ **Three-Panel Layout**: File tree, editor, and AI chat panels
-
-#### Backend (Rust)
-- ✅ File system commands (read directory, file operations)
-- ✅ Project management (create, open, save, delete, list)
-- ✅ Document management (create, save, delete, get, list)
-- ✅ Version control (create, list versions)
-- ✅ Export functionality (Markdown, HTML, Text, JSON)
-
-#### Frontend (React)
-- ✅ Main layout with collapsible panels
-- ✅ File tree component with project/document navigation
-- ✅ Document editor with author notes and content sections
-- ✅ AI chat panel interface
-- ✅ Zustand state management
-- ✅ Dark mode support
-
-#### Shared Packages
-- ✅ `@aidocplus/shared-types`: Common TypeScript types
-- ✅ `@aidocplus/utils`: Utility functions
-
-### Project Structure
+## 项目结构
 
 ```
-aidocplus/
-├── apps/
-│   └── desktop/
-│       ├── src-tauri/          # Tauri backend (Rust)
-│       │   ├── src/
-│       │   │   ├── main.rs
-│       │   │   ├── commands/    # IPC command handlers
-│       │   │   ├── ai.rs        # AI HTTP & streaming
-│       │   │   ├── document.rs
-│       │   │   ├── plugin.rs    # Plugin manifest sync & management
-│       │   │   └── ...
-│       │   └── Cargo.toml
-│       └── src-ui/             # React frontend
-│           ├── src/
-│           │   ├── components/  # UI components (editor, chat, file-tree, tabs, settings)
-│           │   ├── plugins/     # Plugin system (21 external plugins, auto-discovery)
-│           │   │   ├── _framework/  # Plugin SDK
-│           │   │   ├── pluginStore.ts  # Plugin registry (registerPlugin)
-│           │   │   ├── loader.ts       # Auto-discovery (import.meta.glob)
-│           │   │   └── {name}/         # Individual plugins (manifest.json + index.ts + Panel)
-│           │   ├── stores/      # State management (Zustand)
-│           │   └── i18n/        # Internationalization
-│           └── package.json
+AiDocPlus-Main/
+├── apps/desktop/
+│   ├── src-tauri/                  # Rust 后端
+│   │   ├── src/
+│   │   │   ├── main.rs            # 入口 + 菜单
+│   │   │   ├── commands/          # IPC 命令（ai, document, export, resource, template, plugin, workspace...）
+│   │   │   ├── ai.rs              # AI HTTP 请求 + SSE 流式
+│   │   │   ├── template.rs        # 文档模板管理
+│   │   │   ├── resource_engine.rs # SQLite 索引 + FTS5 全文搜索
+│   │   │   ├── native_export/     # 原生导出（HTML, DOCX）
+│   │   │   └── plugin.rs          # 插件 manifest 同步
+│   │   └── bundled-resources/     # 内置资源（由资源仓库 deploy.sh 部署，.gitignore 忽略）
+│   └── src-ui/                    # React 前端
+│       └── src/
+│           ├── components/        # UI 组件（editor, chat, file-tree, tabs, settings, templates）
+│           ├── plugins/           # 插件系统（SDK + 21 个外部插件）
+│           │   ├── _framework/    # 插件 SDK（PluginHostAPI, 布局组件, UI 原语）
+│           │   └── {name}/        # 各插件目录（由 AiDocPlus-Plugins 部署，.gitignore 忽略）
+│           ├── stores/            # Zustand 状态管理
+│           ├── hooks/             # 自定义 Hooks
+│           └── i18n/              # 国际化（中文/英文）
 ├── packages/
-│   ├── shared-types/           # Shared TypeScript types
-│   └── utils/                  # Utility functions
-├── docs/
-│   └── plugin-sdk/             # Plugin SDK documentation & examples
+│   ├── shared-types/              # TypeScript 类型 + generated 文件
+│   └── utils/                     # 工具函数
+├── scripts/
+│   ├── assemble.sh                # 一键总装所有资源仓库
+│   └── deploy.sh                  # 部署源码到构建目标
 └── turbo.json
 ```
 
-### Development
+## 核心功能
+
+- **AI 内容生成** — 流式生成，附件参考，982 个提示词模板（46 分类）
+- **AI 聊天** — 流式对话，联网搜索，13 个 AI 提供商
+- **Markdown 编辑** — CodeMirror 6，语法高亮、折叠、自动补全
+- **三面板布局** — 文件树 + 编辑器（原始/AI 双栏）+ AI 聊天
+- **多标签页编辑** — 独立面板状态
+- **版本控制** — 自动保存，预览和恢复
+- **多格式导出** — Markdown、HTML、DOCX、TXT、PDF（原生 + Pandoc）
+- **插件系统** — 21 个外部插件，自注册 + 自动发现 + manifest 驱动
+- **资源管理器** — 6 个独立 Tauri 桌面应用
+- **文档标签与收藏** — 自定义标签，星标收藏，按标签筛选
+- **工作区持久化** — 标签页、面板布局、项目状态自动保存恢复
+
+## 技术栈
+
+| 层 | 技术 |
+|----|------|
+| **桌面框架** | Tauri 2.x |
+| **前端** | React 19 + TypeScript 5.8+ |
+| **状态管理** | Zustand |
+| **UI** | Radix UI + Tailwind CSS 4 |
+| **编辑器** | CodeMirror 6 |
+| **构建** | Vite 7 + Turborepo + pnpm |
+| **后端** | Rust（文件系统、AI 流式、导出、SQLite 资源引擎） |
+| **国际化** | i18next（中文/英文） |
+
+## 多仓库架构
+
+| 仓库 | 说明 | 数量 |
+|------|------|------|
+| **AiDocPlus-Main**（本仓库） | 主程序源码 | — |
+| [AiDocPlus-Roles](https://github.com/AiDocPlus/AiDocPlus-Roles) | 内置角色 | 10 |
+| [AiDocPlus-PromptTemplates](https://github.com/AiDocPlus/AiDocPlus-PromptTemplates) | 提示词模板（JSON 文件模式） | 982（46 分类） |
+| [AiDocPlus-AIProviders](https://github.com/AiDocPlus/AiDocPlus-AIProviders) | AI 提供商 | 13 |
+| [AiDocPlus-DocTemplates](https://github.com/AiDocPlus/AiDocPlus-DocTemplates) | PPT 主题 + 文档模板 | 8 + 8 |
+| [AiDocPlus-ProjectTemplates](https://github.com/AiDocPlus/AiDocPlus-ProjectTemplates) | 项目模板 | 20（7 分类） |
+| [AiDocPlus-Plugins](https://github.com/AiDocPlus/AiDocPlus-Plugins) | 外部插件 | 21 |
+| [AiDocPlus-ResourceManager](https://github.com/AiDocPlus/AiDocPlus-ResourceManager) | 资源管理器 | 6 |
+| [AiDocPlus](https://github.com/AiDocPlus/AiDocPlus) | 构建目标 + 发布 | — |
+
+每个资源仓库包含 `scripts/build.sh`（生成 TypeScript）和 `scripts/deploy.sh`（部署到构建目标）。
+
+## 开发
+
+### 前置要求
+
+- Node.js >= 18
+- pnpm >= 9
+- Rust stable
+
+### 开发模式
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Run development mode
-cd apps/desktop/src-ui
+# 直接在源码目录运行（推荐，利用增量编译缓存）
+cd apps/desktop
 pnpm tauri dev
-
-# Build for production
-pnpm build
 ```
 
-### Tech Stack
+首次运行需创建符号链接引用外部资源：
+```bash
+# generated TS 文件
+ln -s /path/to/AiDocPlus/packages/shared-types/src/generated \
+      /path/to/AiDocPlus-Main/packages/shared-types/src/generated
 
-- **Desktop Framework**: Tauri 2.x
-- **Frontend**: React 19 + TypeScript 5.8+
-- **State Management**: Zustand
-- **Styling**: Tailwind CSS 4
-- **UI Components**: Radix UI
-- **Build Tool**: Vite 7 + Turborepo
-- **Editor**: CodeMirror 6
-- **i18n**: i18next (zh/en/ja)
+# bundled-resources
+ln -s /path/to/AiDocPlus/apps/desktop/src-tauri/bundled-resources \
+      /path/to/AiDocPlus-Main/apps/desktop/src-tauri/bundled-resources
+```
 
-### Completed Features
+### 总装与构建
 
-- ✅ AI streaming chat & content generation (OpenAI-compatible API, GLM, etc.)
-- ✅ CodeMirror 6 Markdown editor with syntax highlighting, folding, autocomplete
-- ✅ Multi-format export (Markdown, HTML, DOCX, TXT, native + Pandoc)
-- ✅ Version control with preview and restore
-- ✅ Plugin system — 21 external plugins with auto-discovery, self-registration, and manifest-driven architecture
-- ✅ Prompt templates
-- ✅ Workspace autosave
-- ✅ Attachment system
+```bash
+# 一键总装所有资源仓库到构建目标
+bash scripts/assemble.sh
 
-## License
+# 在构建目标验证完整构建
+cd /path/to/AiDocPlus/apps/desktop
+pnpm tauri build
+```
 
-MIT
+### 发布流程
+
+```bash
+# 1. 总装
+bash scripts/assemble.sh
+
+# 2. 本地构建 macOS
+cd AiDocPlus/apps/desktop && pnpm tauri build --target aarch64-apple-darwin
+
+# 3. 推送 tag 触发 Windows CI 构建
+cd AiDocPlus && git tag v0.2.1 && git push origin main v0.2.1
+
+# 4. Draft Release 自动创建，手动发布
+```
+
+## 许可证
+
+[MIT](LICENSE)
