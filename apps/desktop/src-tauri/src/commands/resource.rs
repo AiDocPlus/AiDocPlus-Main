@@ -167,6 +167,13 @@ pub fn open_resource_manager(managerName: String) -> Result<(), String> {
         if let Some(ref dir) = data_dir {
             cmd.arg("--data-dir").arg(dir);
         }
+        // 为资源管理器指定独立的 WebView2 用户数据目录，避免与主程序冲突
+        if let Some(local_app_data) = std::env::var_os("LOCALAPPDATA") {
+            let webview2_dir = std::path::PathBuf::from(local_app_data)
+                .join("com.aidocplus.resource-manager")
+                .join("EBWebView");
+            cmd.env("WEBVIEW2_USER_DATA_FOLDER", &webview2_dir);
+        }
         // CREATE_NEW_PROCESS_GROUP: 让子进程独立运行，不随父进程退出
         cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
         cmd.spawn()
