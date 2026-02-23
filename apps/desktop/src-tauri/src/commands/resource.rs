@@ -114,20 +114,26 @@ pub fn open_resource_manager(managerName: String) -> Result<(), String> {
     // 管理器名称 → 资源类型标识映射（统一管理器使用 --resource-type 参数）
     let resource_type = match managerName.as_str() {
         "提示词模板管理器" => "prompt-templates",
-        "项目模板管理器" => "project-templates",
         "文档模板管理器" => "doc-templates",
-        "角色管理器" => "roles",
-        "AI服务商管理器" => "ai-providers",
-        "插件管理器" => "plugins",
         _ => return Err(format!("未知管理器: {}", managerName)),
     };
 
-    // 提示词模板使用 JSON 文件模式，data-dir 指向 bundled-resources/prompt-templates/
-    // 其他资源类型的 data-dir 由统一管理器自行计算（~/AiDocPlus/<type>/）
+    // 计算数据目录：提示词模板用 bundled-resources，其他用 ~/AiDocPlus/<subdir>/
     let data_dir = if resource_type == "prompt-templates" {
         find_prompt_templates_dir()
     } else {
-        None
+        let subdir = match resource_type {
+            "doc-templates" => "DocTemplates",
+            _ => "",
+        };
+        if !subdir.is_empty() {
+            let home = dirs::home_dir().unwrap_or_else(|| std::path::PathBuf::from("."));
+            let dir = home.join("AiDocPlus").join(subdir);
+            let _ = std::fs::create_dir_all(&dir);
+            Some(dir)
+        } else {
+            None
+        }
     };
 
     #[cfg(target_os = "macos")]
@@ -149,6 +155,9 @@ pub fn open_resource_manager(managerName: String) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+
         let exe_path = managers_dir.join("resource-manager.exe");
         if !exe_path.exists() {
             return Err(format!("管理器未找到: {}", exe_path.display()));
@@ -158,8 +167,10 @@ pub fn open_resource_manager(managerName: String) -> Result<(), String> {
         if let Some(ref dir) = data_dir {
             cmd.arg("--data-dir").arg(dir);
         }
+        // CREATE_NEW_PROCESS_GROUP: 让子进程独立运行，不随父进程退出
+        cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
         cmd.spawn()
-            .map_err(|e| format!("启动管理器失败: {}", e))?;
+            .map_err(|e| format!("启动管理器失败: {} (路径: {})", e, exe_path.display()))?;
     }
 
     #[cfg(target_os = "linux")]
