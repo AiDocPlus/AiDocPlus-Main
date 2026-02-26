@@ -759,12 +759,35 @@ interface DocumentPlugin {
 #### 状态管理（`useCodingStore`）
 
 - **不使用 Zustand persist**，通过 `invoke('save_coding_state')` 手动持久化到 Rust 端文件
-- **持久化内容**：打开的标签页（id + filePath + chatMessages）、activeTabId、favorites、settings、recentFiles
+- **持久化内容**：打开的标签页（id + filePath + chatMessages）、activeTabId、favorites、settings、recentFiles、pythonInfo、nodeInfo（运行时环境检测缓存）
 - **debounce 500ms**：避免频繁写入
 - **初始化**：`init()` 从 Rust 读取状态 → 恢复标签页（逐个 `read_coding_script` 加载代码）→ 至少保持一个默认 Python 标签页
 - **设置项**（`CodingSettings`）：timeout、customPythonPath、customNodePath、fontSize、editorTheme、布局记忆（outputHeight、assistantWidth、fileTreeWidth 等）
+- **运行时环境缓存**（`RuntimeCheckResult`）：`pythonInfo`、`nodeInfo`，通过 `detectPython()` / `detectNode()` action 异步检测并缓存，支持 `force` 参数强制重新检测
 - **运行历史**（`RunHistoryEntry`）：最多 50 条，包含 fileName、language、exitCode、durationMs、timestamp
 - **最近文件**（`recentFiles`）：最多 20 条，欢迎页显示
+
+#### Python / Node.js 运行时检测架构
+
+**问题**：编程区打开时需检测 Python/Node.js 解释器，同步调用子进程会阻塞 UI，尤其在 Windows 上非常慢。
+
+**三层解决方案**：
+
+1. **Rust 端 — async + `spawn_blocking`**：
+   - `check_python` / `discover_pythons`（`commands/python.rs`）— 同步逻辑提取为 `_sync` 内部函数，Tauri 命令改为 `async`，通过 `tokio::task::spawn_blocking` 调用
+   - `check_nodejs`（`commands/nodejs.rs`）— 同上
+   - 效果：子进程执行在 tokio 阻塞线程池，不占用 Tauri 异步线程，UI 不卡顿
+
+2. **前端 Store — 缓存 + 持久化**：
+   - `useCodingStore` 新增 `pythonInfo` / `nodeInfo`（`RuntimeCheckResult | null`）、`pythonDetecting` / `nodeDetecting` 状态
+   - `detectPython(force?)` / `detectNode(force?)` action：无缓存时异步检测，检测结果写入 Store 并持久化到磁盘
+   - `init()` 从持久化状态恢复缓存，后续打开编程区时直接读取缓存，零延迟
+
+3. **前端 CodingPanel — 缓存读取 + 懒加载**：
+   - `pythonInfo` / `nodeInfo` 从 Store 读取（不再用 `useState`）
+   - 组件挂载时调用 `store.detectPython()` / `store.detectNode()`，有缓存时直接跳过
+   - 用户修改 `customPythonPath` / `customNodePath` 时强制重新检测
+   - `discover_pythons` 懒加载：仅在用户打开 Python 解释器选择器弹窗时才触发，加载中显示 spinner
 
 #### AI 自动化引擎（`codingAI.ts`）
 
