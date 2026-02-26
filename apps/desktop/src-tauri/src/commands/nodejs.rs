@@ -92,13 +92,9 @@ fn get_node_path(node: &str) -> Option<String> {
     }
 }
 
-/// 检测系统 Node.js 是否可用
-#[tauri::command]
-pub fn check_nodejs(
-    #[allow(non_snake_case)]
-    customPath: Option<String>,
-) -> NodeCheckResult {
-    let node = find_node(customPath.as_deref());
+/// 检测系统 Node.js 是否可用（同步内部实现）
+fn check_nodejs_sync(custom_path: Option<String>) -> NodeCheckResult {
+    let node = find_node(custom_path.as_deref());
     match node {
         Some(n) => {
             match Command::new(&n).arg("--version").output() {
@@ -129,6 +125,22 @@ pub fn check_nodejs(
             error: Some("未找到 Node.js，请安装 Node.js 或在设置中指定路径".to_string()),
         },
     }
+}
+
+/// 检测系统 Node.js 是否可用（异步，不阻塞主线程）
+#[tauri::command]
+pub async fn check_nodejs(
+    #[allow(non_snake_case)]
+    customPath: Option<String>,
+) -> NodeCheckResult {
+    tokio::task::spawn_blocking(move || check_nodejs_sync(customPath))
+        .await
+        .unwrap_or_else(|_| NodeCheckResult {
+            available: false,
+            version: None,
+            path: None,
+            error: Some("检测任务失败".to_string()),
+        })
 }
 
 /// 执行 JavaScript/TypeScript 脚本

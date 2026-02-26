@@ -46,6 +46,13 @@ export interface CodingTab {
 
 export type AssistantMode = 'chat' | 'code' | 'plan';
 
+export interface RuntimeCheckResult {
+  available: boolean;
+  version: string | null;
+  path: string | null;
+  error: string | null;
+}
+
 export interface CodingSettings {
   timeout: number;
   customPythonPath: string;
@@ -90,9 +97,17 @@ interface CodingState {
   runHistory: RunHistoryEntry[];
   recentFiles: string[];
 
+  // 运行时环境缓存
+  pythonInfo: RuntimeCheckResult | null;
+  nodeInfo: RuntimeCheckResult | null;
+  pythonDetecting: boolean;
+  nodeDetecting: boolean;
+
   // 动作
   init: () => Promise<void>;
   persistState: () => void;
+  detectPython: (force?: boolean) => Promise<void>;
+  detectNode: (force?: boolean) => Promise<void>;
 
   // 标签页
   addTab: (tab: CodingTab) => void;
@@ -258,6 +273,10 @@ export const useCodingStore = create<CodingState>()((set, get) => ({
   initialized: false,
   runHistory: [],
   recentFiles: [],
+  pythonInfo: null,
+  nodeInfo: null,
+  pythonDetecting: false,
+  nodeDetecting: false,
 
   init: async () => {
     if (get().initialized) return;
@@ -275,7 +294,9 @@ export const useCodingStore = create<CodingState>()((set, get) => ({
           favorites = state.favorites || [];
           settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
           const recentFiles = Array.isArray(state.recentFiles) ? state.recentFiles.slice(0, 20) : [];
-          set({ recentFiles });
+          const cachedPythonInfo = state.pythonInfo || null;
+          const cachedNodeInfo = state.nodeInfo || null;
+          set({ recentFiles, pythonInfo: cachedPythonInfo, nodeInfo: cachedNodeInfo });
           activeTabId = state.activeTabId || '';
 
           // 恢复打开的标签页
@@ -332,16 +353,56 @@ export const useCodingStore = create<CodingState>()((set, get) => ({
     }
   },
 
+  detectPython: async (force = false) => {
+    const { pythonInfo, pythonDetecting, settings } = get();
+    if (pythonDetecting) return;
+    if (!force && pythonInfo !== null) return;
+    set({ pythonDetecting: true });
+    try {
+      const result = await invoke<RuntimeCheckResult>('check_python', {
+        customPath: settings.customPythonPath || null,
+      });
+      set({ pythonInfo: result, pythonDetecting: false });
+      get().persistState();
+    } catch (err) {
+      set({
+        pythonInfo: { available: false, version: null, path: null, error: String(err) },
+        pythonDetecting: false,
+      });
+    }
+  },
+
+  detectNode: async (force = false) => {
+    const { nodeInfo, nodeDetecting, settings } = get();
+    if (nodeDetecting) return;
+    if (!force && nodeInfo !== null) return;
+    set({ nodeDetecting: true });
+    try {
+      const result = await invoke<RuntimeCheckResult>('check_nodejs', {
+        customPath: settings.customNodePath || null,
+      });
+      set({ nodeInfo: result, nodeDetecting: false });
+      get().persistState();
+    } catch (err) {
+      set({
+        nodeInfo: { available: false, version: null, path: null, error: String(err) },
+        nodeDetecting: false,
+      });
+    }
+  },
+
   persistState: () => {
     if (_persistTimer) clearTimeout(_persistTimer);
     _persistTimer = setTimeout(() => {
-      const { tabs, activeTabId, favorites, settings, recentFiles } = get();
+      const { tabs, activeTabId, favorites, settings, recentFiles, pythonInfo, nodeInfo } = get();
       const state = {
         openTabs: tabs.map(t => ({ id: t.id, filePath: t.filePath, chatMessages: t.chatMessages || [] })),
         activeTabId,
         favorites,
         settings,
         recentFiles,
+        pythonInfo,
+        nodeInfo,
       };
       invoke('save_coding_state', { json: JSON.stringify(state, null, 2) }).catch(() => {});
       _persistTimer = null;

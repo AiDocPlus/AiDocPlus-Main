@@ -65,13 +65,9 @@ pub fn find_python(custom_path: Option<&str>) -> Option<String> {
     None
 }
 
-/// 检测系统 Python 是否可用
-#[tauri::command]
-pub fn check_python(
-    #[allow(non_snake_case)]
-    customPath: Option<String>,
-) -> PythonCheckResult {
-    let python = find_python(customPath.as_deref());
+/// 检测系统 Python 是否可用（同步内部实现）
+fn check_python_sync(custom_path: Option<String>) -> PythonCheckResult {
+    let python = find_python(custom_path.as_deref());
     match python {
         Some(py) => {
             match Command::new(&py).arg("--version").output() {
@@ -108,6 +104,22 @@ pub fn check_python(
             error: Some("未找到 Python，请安装 Python 3 或在设置中指定路径".to_string()),
         },
     }
+}
+
+/// 检测系统 Python 是否可用（异步，不阻塞主线程）
+#[tauri::command]
+pub async fn check_python(
+    #[allow(non_snake_case)]
+    customPath: Option<String>,
+) -> PythonCheckResult {
+    tokio::task::spawn_blocking(move || check_python_sync(customPath))
+        .await
+        .unwrap_or_else(|_| PythonCheckResult {
+            available: false,
+            version: None,
+            path: None,
+            error: Some("检测任务失败".to_string()),
+        })
 }
 
 /// 获取 Python 可执行文件的完整路径
@@ -157,9 +169,8 @@ pub struct PythonInterpreter {
     pub label: String,
 }
 
-/// 发现系统中所有可用的 Python 解释器
-#[tauri::command]
-pub fn discover_pythons() -> Vec<PythonInterpreter> {
+/// 发现系统中所有可用的 Python 解释器（同步内部实现）
+fn discover_pythons_sync() -> Vec<PythonInterpreter> {
     let mut found: Vec<PythonInterpreter> = Vec::new();
     let mut seen_paths = std::collections::HashSet::new();
 
@@ -275,6 +286,14 @@ pub fn discover_pythons() -> Vec<PythonInterpreter> {
     }
 
     found
+}
+
+/// 发现系统中所有可用的 Python 解释器（异步，不阻塞主线程）
+#[tauri::command]
+pub async fn discover_pythons() -> Vec<PythonInterpreter> {
+    tokio::task::spawn_blocking(discover_pythons_sync)
+        .await
+        .unwrap_or_default()
 }
 
 /// 探测单个 Python 路径，返回其信息

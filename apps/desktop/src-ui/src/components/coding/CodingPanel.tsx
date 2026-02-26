@@ -67,20 +67,6 @@ function parseAnsiLine(text: string): Array<{ text: string; className: string }>
 
 // ── 类型 ──
 
-interface PythonCheckResult {
-  available: boolean;
-  version: string | null;
-  path: string | null;
-  error: string | null;
-}
-
-interface NodeCheckResult {
-  available: boolean;
-  version: string | null;
-  path: string | null;
-  error: string | null;
-}
-
 interface ScriptRunResult {
   stdout: string;
   stderr: string;
@@ -190,15 +176,16 @@ export function CodingPanel() {
 
   const activeTab = useMemo(() => tabs.find(t => t.id === activeTabId) || tabs[0], [tabs, activeTabId]);
 
-  // ── Python 环境 ──
-  const [pythonInfo, setPythonInfo] = useState<PythonCheckResult | null>(null);
-  const [detecting, setDetecting] = useState(true);
+  // ── Python 环境（从 Store 缓存读取） ──
+  const pythonInfo = store.pythonInfo;
+  const detecting = store.pythonDetecting;
   const [pythonList, setPythonList] = useState<PythonInterpreter[]>([]);
+  const [pythonListLoaded, setPythonListLoaded] = useState(false);
   const [pythonPopoverOpen, setPythonPopoverOpen] = useState(false);
 
-  // ── Node.js 环境 ──
-  const [nodeInfo, setNodeInfo] = useState<NodeCheckResult | null>(null);
-  const [nodeDetecting, setNodeDetecting] = useState(true);
+  // ── Node.js 环境（从 Store 缓存读取） ──
+  const nodeInfo = store.nodeInfo;
+  const nodeDetecting = store.nodeDetecting;
 
   // ── 运行状态 ──
   const [running, setRunning] = useState(false);
@@ -265,50 +252,27 @@ export function CodingPanel() {
     setTimeout(() => setStatusMsg(null), 4000);
   }, []);
 
-  // ── 初始化：检测 Python ──
+  // ── 初始化：从缓存或异步检测 Python / Node.js ──
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const result = await invoke<PythonCheckResult>('check_python', {
-          customPath: settings.customPythonPath || null,
-        });
-        if (!cancelled) { setPythonInfo(result); setDetecting(false); }
-      } catch (err) {
-        if (!cancelled) {
-          setPythonInfo({ available: false, version: null, path: null, error: String(err) });
-          setDetecting(false);
-        }
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [settings.customPythonPath]);
-
-  // ── 初始化：检测 Node.js ──
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const result = await invoke<NodeCheckResult>('check_nodejs', {
-          customPath: settings.customNodePath || null,
-        });
-        if (!cancelled) { setNodeInfo(result); setNodeDetecting(false); }
-      } catch (err) {
-        if (!cancelled) {
-          setNodeInfo({ available: false, version: null, path: null, error: String(err) });
-          setNodeDetecting(false);
-        }
-      }
-    })();
-    return () => { cancelled = true; };
-  }, [settings.customNodePath]);
-
-  // ── 发现系统中所有 Python 解释器 ──
-  useEffect(() => {
-    invoke<PythonInterpreter[]>('discover_pythons').then(list => {
-      setPythonList(list || []);
-    }).catch(() => {});
+    store.detectPython();
+    store.detectNode();
   }, []);
+
+  // ── 用户修改自定义路径时强制重新检测 ──
+  const prevPythonPathRef = useRef(settings.customPythonPath);
+  const prevNodePathRef = useRef(settings.customNodePath);
+  useEffect(() => {
+    if (settings.customPythonPath !== prevPythonPathRef.current) {
+      prevPythonPathRef.current = settings.customPythonPath;
+      store.detectPython(true);
+    }
+  }, [settings.customPythonPath]);
+  useEffect(() => {
+    if (settings.customNodePath !== prevNodePathRef.current) {
+      prevNodePathRef.current = settings.customNodePath;
+      store.detectNode(true);
+    }
+  }, [settings.customNodePath]);
 
   // ── CodeMirror 扩展（动态语言加载） ──
   const [cmLangExts, setCmLangExts] = useState<any[]>([]);
@@ -929,13 +893,23 @@ export function CodingPanel() {
       : <span className="text-sm text-destructive flex items-center gap-1 cursor-pointer hover:underline"><XCircle className="h-3 w-3" />{t('coding.pythonNotFound', { defaultValue: '未找到 Python' })}<ChevronDown className="h-2.5 w-2.5 opacity-60" /></span>;
 
     return (
-      <Popover open={pythonPopoverOpen} onOpenChange={setPythonPopoverOpen}>
+      <Popover open={pythonPopoverOpen} onOpenChange={(open) => {
+          setPythonPopoverOpen(open);
+          if (open && !pythonListLoaded) {
+            invoke<PythonInterpreter[]>('discover_pythons').then(list => {
+              setPythonList(list || []);
+              setPythonListLoaded(true);
+            }).catch(() => { setPythonListLoaded(true); });
+          }
+        }}>
         <PopoverTrigger asChild>
           {statusContent}
         </PopoverTrigger>
         <PopoverContent side="bottom" align="start" className="w-80 p-1.5 max-h-72 overflow-y-auto">
           <p className="text-xs font-medium text-muted-foreground px-2 py-1">{t('coding.selectPython', { defaultValue: '选择 Python 解释器' })}</p>
-          {pythonList.length > 0 ? pythonList.map((py, i) => (
+          {!pythonListLoaded ? (
+            <div className="text-xs text-muted-foreground px-2 py-2 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />正在搜索...</div>
+          ) : pythonList.length > 0 ? pythonList.map((py, i) => (
             <button key={i}
               className={`w-full text-left px-2 py-1.5 rounded text-sm transition-colors ${
                 settings.customPythonPath === py.path || (!settings.customPythonPath && pythonInfo?.path === py.path)
@@ -954,7 +928,7 @@ export function CodingPanel() {
         </PopoverContent>
       </Popover>
     );
-  }, [detecting, pythonInfo, pythonList, pythonPopoverOpen, settings.customPythonPath, t, updateSettings]);
+  }, [detecting, pythonInfo, pythonList, pythonListLoaded, pythonPopoverOpen, settings.customPythonPath, t, updateSettings]);
 
   // ── 输出状态指示 ──
   const outputStatusEl = useMemo(() => {
