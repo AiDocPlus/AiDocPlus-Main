@@ -28,6 +28,7 @@ const ALLOWED_PLUGIN_COMMANDS = new Set([
   // 文件操作（导出功能）
   'write_binary_file',      // 写入二进制文件
   'read_file_base64',       // 读取文件为 base64（附件处理）
+  'read_text_file',         // 读取文本文件（CSV 导入等）
   'get_temp_dir',           // 获取临时目录
   'open_file_with_app',     // 用系统应用打开文件（预览）
 
@@ -45,6 +46,24 @@ const ALLOWED_PLUGIN_COMMANDS = new Set([
 
   // 微信公众号（通用 HTTP 请求）
   'wechat_http_request',    // 通用 HTTP 请求（支持 JSON + multipart）
+
+  // TTS 系统语音命令
+  'tts_capabilities',       // 获取 TTS 引擎能力
+  'tts_speak',              // 播放文本
+  'tts_stop',               // 停止播放
+  'tts_is_speaking',        // 查询播放状态
+  'tts_set_rate',           // 设置语速
+  'tts_set_pitch',          // 设置音调
+  'tts_set_volume',         // 设置音量
+  'tts_get_params',         // 获取当前参数
+  'tts_get_param_ranges',   // 获取参数范围
+  'tts_list_voices',        // 列出可用语音
+  'tts_set_voice',          // 设置语音
+
+  // Python 脚本执行
+  'check_python',           // 检测系统 Python 可用性
+  'run_python_script',      // 执行 Python 脚本
+
 ]);
 
 /**
@@ -217,6 +236,10 @@ export interface PlatformAPI {
    * @param params 插值参数
    */
   t(key: string, params?: Record<string, string | number>): string;
+  /**
+   * 用系统浏览器打开外部 URL
+   */
+  openUrl(url: string): Promise<void>;
 }
 
 /** 主程序向插件提供的完整 API */
@@ -556,6 +579,9 @@ export function createPluginHostAPI(opts: CreatePluginHostAPIOptions): PluginHos
       } catch {
         return sectionData as T;
       }
+    },
+    openUrl: async (url: string): Promise<void> => {
+      await invoke('open_file_with_app', { path: url });
     },
     t: (key: string, params?: Record<string, string | number>): string => {
       // 支持带命名空间前缀的 key（如 'plugin-email:title'）
