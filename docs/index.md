@@ -9,7 +9,7 @@ title: AiDocPlus - AI 驱动的智能文档创作工具
 
 [下载安装](./docs/getting-started/installation) · [快速开始](./docs/getting-started/quick-start) · [使用文档](./docs/) · [GitHub](https://github.com/AiDocPlus/AiDocPlus)
 
-![AiDocPlus 主界面](./screenshots/main-interface.png)
+![AiDocPlus 主界面](./screenshots/main-interface.PNG)
 
 ---
 
@@ -57,7 +57,7 @@ AiDocPlus 提供**五大工作区**协同完成内容创作：
 2. [配置 AI 服务](./docs/getting-started/zhipu-api)（推荐智谱 AI，新用户赠送 2000 万 Tokens）
 3. [5 分钟上手教程](./docs/getting-started/quick-start)
 
-![新手引导](./screenshots/first-run-step1-welcome.png)
+![新手引导](./screenshots/first-run-step1-welcome.PNG)
 
 ## 下载
 

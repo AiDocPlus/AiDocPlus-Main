@@ -11,7 +11,7 @@ title: 快速开始 - AiDocPlus
 
 启动 AiDocPlus 后，你会看到主界面：
 
-![AiDocPlus 主界面](../../screenshots/main-interface.png)
+![AiDocPlus 主界面](../../screenshots/main-interface.PNG)
 
 ### 五大工作区
 
@@ -29,7 +29,7 @@ title: 快速开始 - AiDocPlus
 
 首次启动时，程序会自动弹出新手引导。你也可以通过菜单 **帮助 → 新手引导** 重新打开。
 
-![新手引导 - 欢迎](../../screenshots/first-run-step1-welcome.png)
+![新手引导 - 欢迎](../../screenshots/first-run-step1-welcome.PNG)
 
 手动配置步骤：
 1. 点击标签栏右侧的 ⚙️ 按钮打开**设置面板**
@@ -38,7 +38,7 @@ title: 快速开始 - AiDocPlus
 4. 填入 API Key
 5. 点击 **测试连接** 验证
 
-![AI 设置](../../screenshots/settings-ai.png)
+![AI 设置](../../screenshots/settings-ai.PNG)
 
 > 详细教程：[如何获取智谱 AI API Key](./zhipu-api)
 

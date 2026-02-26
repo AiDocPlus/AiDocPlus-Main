@@ -30,7 +30,7 @@ title: 配置智谱 AI - AiDocPlus
 5. 点击 **测试连接** 验证是否成功
 6. 选择要使用的模型（推荐 GLM-4-Flash，免费且速度快）
 
-![AI 设置面板](../../screenshots/settings-ai.png)
+![AI 设置面板](../../screenshots/settings-ai.PNG)
 
 ## 推荐模型
 
