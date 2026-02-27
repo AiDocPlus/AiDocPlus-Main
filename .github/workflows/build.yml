@@ -44,6 +44,27 @@ jobs:
           path: plugins-repo
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Checkout prompt templates repository
+        uses: actions/checkout@v4
+        with:
+          repository: AiDocPlus/AiDocPlus-PromptTemplates
+          path: prompt-templates-repo
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout doc templates repository
+        uses: actions/checkout@v4
+        with:
+          repository: AiDocPlus/AiDocPlus-DocTemplates
+          path: doc-templates-repo
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout AI providers repository
+        uses: actions/checkout@v4
+        with:
+          repository: AiDocPlus/AiDocPlus-AIProviders
+          path: ai-providers-repo
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -107,6 +128,21 @@ jobs:
 
           echo "=== 部署完成 ==="
 
+      - name: Sync generated resource types
+        shell: bash
+        run: |
+          GENERATED_DIR="./packages/shared-types/src/generated"
+          mkdir -p "$GENERATED_DIR"
+
+          cp ./prompt-templates-repo/dist/prompt-templates.generated.ts "$GENERATED_DIR/"
+          cp ./prompt-templates-repo/dist/template-categories.generated.ts "$GENERATED_DIR/"
+          cp ./doc-templates-repo/dist/ppt-themes.generated.ts "$GENERATED_DIR/"
+          cp ./doc-templates-repo/dist/doc-template-categories.generated.ts "$GENERATED_DIR/"
+          cp ./doc-templates-repo/dist/doc-templates.generated.ts "$GENERATED_DIR/"
+          cp ./ai-providers-repo/dist/ai-providers.generated.ts "$GENERATED_DIR/"
+
+          echo "=== generated 资源文件同步完成 ==="
+
       - name: Install frontend dependencies
         run: pnpm install
 
@@ -127,13 +163,19 @@ jobs:
           security find-identity -v -p codesigning build.keychain
 
       - name: Prepare App Store Connect API key (optional)
-        if: matrix.platform == 'macos-latest' && secrets.APPLE_API_PRIVATE_KEY_BASE64 != ''
+        if: matrix.platform == 'macos-latest'
         env:
           APPLE_API_PRIVATE_KEY_BASE64: ${{ secrets.APPLE_API_PRIVATE_KEY_BASE64 }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
         run: |
+          if [ -z "$APPLE_API_PRIVATE_KEY_BASE64" ] || [ -z "$APPLE_API_KEY" ]; then
+            echo "App Store Connect API key not configured, skip API key based notarization"
+            exit 0
+          fi
+
           mkdir -p "$RUNNER_TEMP/private_keys"
-          echo "$APPLE_API_PRIVATE_KEY_BASE64" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey_${{ secrets.APPLE_API_KEY }}.p8"
-          echo "APPLE_API_KEY_PATH=$RUNNER_TEMP/private_keys/AuthKey_${{ secrets.APPLE_API_KEY }}.p8" >> "$GITHUB_ENV"
+          echo "$APPLE_API_PRIVATE_KEY_BASE64" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey_${APPLE_API_KEY}.p8"
+          echo "APPLE_API_KEY_PATH=$RUNNER_TEMP/private_keys/AuthKey_${APPLE_API_KEY}.p8" >> "$GITHUB_ENV"
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0
