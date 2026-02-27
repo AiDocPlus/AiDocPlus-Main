@@ -1766,6 +1766,17 @@
     "templateSlideCount": "Suggested Slides",
     "templatePrompt": "Prompt Template Content (optional, auto-generated if empty)"
   },
+  "update": {
+    "newVersionAvailable": "New version available",
+    "downloading": "Downloading update...",
+    "readyToRestart": "Update is ready",
+    "upToDate": "Already up to date",
+    "checkFailed": "Failed to check updates",
+    "downloadAndInstall": "Download and install",
+    "restartToApply": "Restart app to apply the update",
+    "restartNow": "Restart now",
+    "currentVersion": "Current version"
+  },
   "coding": {
     "loading": "Loading coding area...",
     "loadingEditor": "Loading editor...",

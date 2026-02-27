@@ -6,6 +6,7 @@ import { useSettingsStore } from './stores/useSettingsStore';
 import { useTemplatesStore } from './stores/useTemplatesStore';
 import { useWorkspaceAutosave } from './hooks/useWorkspaceAutosave';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { UpdateChecker } from './components/settings/UpdateChecker';
 import './i18n'; // Initialize i18n
 
 const queryClient = new QueryClient({
@@ -82,7 +83,12 @@ function AppContent() {
     );
   }
 
-  return <MainLayout />;
+  return (
+    <>
+      <MainLayout />
+      <UpdateChecker />
+    </>
+  );
 }
 
 function App() {

@@ -56,6 +56,10 @@ fn main() {
             app.manage(TtsState(std::sync::Mutex::new(None)));
             app.manage(RunningScriptState::default());
 
+            // 注册自动更新插件
+            #[cfg(desktop)]
+            app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
+
             // 初始化跨平台资源路径（必须在其他模块使用 bundled-resources 之前）
             paths::init_bundled_resources_dir(app);
 
