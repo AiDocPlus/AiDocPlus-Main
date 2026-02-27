@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build Windows x64
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to build (e.g., 0.1.3)'
+        description: 'Version to build (e.g., 0.1.6)'
         required: false
         default: ''
 
@@ -17,213 +17,202 @@ permissions:
 env:
   PYTHONIOENCODING: utf-8
   PYTHONUTF8: '1'
+  # 共享 Rust target 目录：ResourceManager 和主程序 99.6% 依赖相同，避免重复编译
+  CARGO_TARGET_DIR: ${{ github.workspace }}/rust-target
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: macos-latest
-            args: --target aarch64-apple-darwin
-            target: aarch64-apple-darwin
-            artifact: dmg
-          - platform: windows-latest
-            args: --target x86_64-pc-windows-msvc
-            target: x86_64-pc-windows-msvc
-            artifact: nsis
-
-    runs-on: ${{ matrix.platform }}
+  build-windows:
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout main repository
+      # ── 1. Checkout 所有仓库到同级目录 ──
+      - name: Checkout AiDocPlus (build target)
         uses: actions/checkout@v4
         with:
+          path: AiDocPlus
           persist-credentials: false
 
-      - name: Checkout plugins repository
+      - name: Checkout AiDocPlus-Main
         uses: actions/checkout@v4
         with:
-          repository: AiDocPlus/AiDocPlus-Plugins
-          path: plugins-repo
-          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: AiDocPlus/AiDocPlus-Main
+          path: AiDocPlus-Main
 
-      - name: Checkout prompt templates repository
+      - name: Checkout AiDocPlus-PromptTemplates
         uses: actions/checkout@v4
         with:
           repository: AiDocPlus/AiDocPlus-PromptTemplates
-          path: prompt-templates-repo
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: AiDocPlus-PromptTemplates
 
-      - name: Checkout doc templates repository
+      - name: Checkout AiDocPlus-DocTemplates
         uses: actions/checkout@v4
         with:
           repository: AiDocPlus/AiDocPlus-DocTemplates
-          path: doc-templates-repo
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: AiDocPlus-DocTemplates
 
-      - name: Checkout AI providers repository
+      - name: Checkout AiDocPlus-AIProviders
         uses: actions/checkout@v4
         with:
           repository: AiDocPlus/AiDocPlus-AIProviders
-          path: ai-providers-repo
-          token: ${{ secrets.GITHUB_TOKEN }}
+          path: AiDocPlus-AIProviders
+
+      - name: Checkout AiDocPlus-Plugins
+        uses: actions/checkout@v4
+        with:
+          repository: AiDocPlus/AiDocPlus-Plugins
+          path: AiDocPlus-Plugins
+
+      - name: Checkout AiDocPlus-ResourceManager
+        uses: actions/checkout@v4
+        with:
+          repository: AiDocPlus/AiDocPlus-ResourceManager
+          path: AiDocPlus-ResourceManager
+
+      # ── 2. 安装工具链 ──
+      - name: Setup Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Setup Python 3
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          targets: x86_64-pc-windows-msvc
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: './apps/desktop/src-tauri -> target'
+          # 声明两个 workspace，共享同一个 target 目录，避免重复编译
+          workspaces: |
+            ./AiDocPlus/apps/desktop/src-tauri -> ${{ github.workspace }}/rust-target
+            ./AiDocPlus-ResourceManager/apps/resource-manager/src-tauri -> ${{ github.workspace }}/rust-target
+          # 缓存所有 crate（包括 registry index），加速依赖下载
+          cache-all-crates: true
+          # 即使构建失败也保存缓存，下次可复用已编译的依赖
+          cache-on-failure: true
 
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('AiDocPlus/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
-      - name: Deploy plugins to main project
+      # ── 3. 总装（assemble） ──
+      - name: Deploy AiDocPlus-Main (rsync replacement)
         shell: bash
         run: |
-          # 部署插件目录（排除 SDK 文件）
-          SRC_PLUGINS="./plugins-repo/plugins"
-          DST_PLUGINS="./apps/desktop/src-ui/src/plugins"
+          echo "Deploy AiDocPlus-Main..."
+          MAIN_DIR="AiDocPlus-Main"
+          TARGET_DIR="AiDocPlus"
 
-          # SDK 文件列表（不部署，这些由主程序维护）
-          SDK_FILES=("_framework" "types.ts" "pluginStore.ts" "i18n-loader.ts" "constants.ts" "fragments.ts" "registry.ts" "env.d.ts")
-
-          is_sdk_file() {
-            local name="$1"
-            for sdk in "${SDK_FILES[@]}"; do
-              if [ "$name" = "$sdk" ]; then
-                return 0
-              fi
+          cd "$MAIN_DIR"
+          find . -type f \
+            ! -path '*/node_modules/*' \
+            ! -path '*/.git/*' \
+            ! -path '*/.turbo/*' \
+            ! -path '*/target/*' \
+            ! -path '*/.DS_Store' \
+            ! -path '*/plugins-repo/*' \
+            ! -path '*/.claude/*' \
+            ! -path '*/scripts/deploy.sh' \
+            ! -name 'pnpm-lock.yaml' \
+            ! -name '.gitignore' \
+            ! -path '*/packages/shared-types/src/generated/*.generated.ts' \
+            ! -path '*/apps/desktop/src-tauri/bundled-resources/*' \
+            ! -path '*/apps/desktop/src-ui/src/plugins/*/*' \
+            | while IFS= read -r file; do
+              dir=$(dirname "$file")
+              mkdir -p "../${TARGET_DIR}/${dir}"
+              cp -f "$file" "../${TARGET_DIR}/${file}"
             done
-            return 1
-          }
+          cd ..
 
-          echo "=== 部署插件 ==="
-          echo "源: $SRC_PLUGINS"
-          echo "目标: $DST_PLUGINS"
+          mkdir -p "${TARGET_DIR}/packages/shared-types/src/generated"
+          echo "AiDocPlus-Main deployed"
 
-          for dir in "$SRC_PLUGINS"/*/; do
-            name=$(basename "$dir")
-            if is_sdk_file "$name"; then
-              echo "  跳过 SDK 文件: $name"
-              continue
+      - name: Deploy resource repositories
+        shell: bash
+        run: |
+          for repo in PromptTemplates DocTemplates AIProviders; do
+            REPO_DIR="AiDocPlus-${repo}"
+            echo "Deploy ${REPO_DIR}..."
+            if [ -f "${REPO_DIR}/scripts/build.sh" ]; then
+              bash "${REPO_DIR}/scripts/build.sh"
             fi
-            echo "  → $name"
-            rm -rf "$DST_PLUGINS/$name"
-            cp -r "$SRC_PLUGINS/$name" "$DST_PLUGINS/$name"
+            bash "${REPO_DIR}/scripts/deploy.sh"
           done
 
-          echo "=== 部署完成 ==="
+          echo "Deploy AiDocPlus-Plugins..."
+          bash AiDocPlus-Plugins/scripts/deploy.sh
 
-      - name: Build resource repositories
+          echo "Assembly complete"
+
+      - name: Build unified resource manager (Windows exe)
         shell: bash
         run: |
-          bash ./prompt-templates-repo/scripts/build.sh
-          bash ./doc-templates-repo/scripts/build.sh
-          bash ./ai-providers-repo/scripts/build.sh
+          cd AiDocPlus-ResourceManager
+          pnpm install
 
-      - name: Sync generated resource types
-        shell: bash
-        run: |
-          GENERATED_DIR="./packages/shared-types/src/generated"
-          mkdir -p "$GENERATED_DIR"
+          # 使用 --no-bundle 跳过 WiX/MSI 打包，只需要 exe
+          # CARGO_TARGET_DIR 环境变量优先级高于 .cargo/config.toml 中的本地路径
+          echo "[tauri build] resource-manager --no-bundle (shared target: $CARGO_TARGET_DIR)"
+          (cd apps/resource-manager && npx tauri build --no-bundle --target x86_64-pc-windows-msvc 2>&1 | tail -10)
 
-          cp ./prompt-templates-repo/dist/prompt-templates.generated.ts "$GENERATED_DIR/"
-          cp ./prompt-templates-repo/dist/template-categories.generated.ts "$GENERATED_DIR/"
-          cp ./doc-templates-repo/dist/ppt-themes.generated.ts "$GENERATED_DIR/"
-          cp ./doc-templates-repo/dist/doc-template-categories.generated.ts "$GENERATED_DIR/"
-          cp ./doc-templates-repo/dist/doc-templates.generated.ts "$GENERATED_DIR/"
-          cp ./ai-providers-repo/dist/ai-providers.generated.ts "$GENERATED_DIR/"
+          TARGET_DIR="../AiDocPlus/apps/desktop/src-tauri/bundled-resources/managers"
+          mkdir -p "$TARGET_DIR"
+          # 清理 macOS .app（从 Git 仓库带来的，Windows 上不需要）
+          rm -rf "$TARGET_DIR/资源管理器.app"
+          cp "${CARGO_TARGET_DIR}/x86_64-pc-windows-msvc/release/resource-manager.exe" "$TARGET_DIR/"
+          echo "[done] Deployed unified resource-manager.exe (cleaned macOS .app)"
 
-          echo "=== generated 资源文件同步完成 ==="
-
+      # ── 4. 安装依赖并构建 ──
       - name: Install frontend dependencies
-        run: pnpm install
+        working-directory: AiDocPlus
+        run: pnpm install --no-frozen-lockfile
 
-      - name: Import Apple Developer Certificate
-        if: matrix.platform == 'macos-latest'
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      - name: Determine version tag
+        id: version
+        shell: bash
         run: |
-          if [ -z "$APPLE_CERTIFICATE" ] || [ -z "$APPLE_CERTIFICATE_PASSWORD" ] || [ -z "$KEYCHAIN_PASSWORD" ]; then
-            echo "Apple signing secrets not configured, skip certificate import"
-            exit 0
+          # tag 触发时直接用 tag 名；手动触发时从 tauri.conf.json 读取版本号
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          else
+            VERSION=$(python -c "import json; print(json.load(open('AiDocPlus/apps/desktop/src-tauri/tauri.conf.json'))['version'])")
+            echo "tag=v${VERSION}" >> $GITHUB_OUTPUT
           fi
+          echo "Resolved tag: $(cat $GITHUB_OUTPUT)"
 
-          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
-          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security set-keychain-settings -t 3600 -u build.keychain
-          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          security find-identity -v -p codesigning build.keychain
-
-      - name: Prepare App Store Connect API key (optional)
-        if: matrix.platform == 'macos-latest'
-        env:
-          APPLE_API_PRIVATE_KEY_BASE64: ${{ secrets.APPLE_API_PRIVATE_KEY_BASE64 }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-        run: |
-          if [ -z "$APPLE_API_PRIVATE_KEY_BASE64" ] || [ -z "$APPLE_API_KEY" ]; then
-            echo "App Store Connect API key not configured, skip API key based notarization"
-            exit 0
-          fi
-
-          mkdir -p "$RUNNER_TEMP/private_keys"
-          echo "$APPLE_API_PRIVATE_KEY_BASE64" | base64 --decode > "$RUNNER_TEMP/private_keys/AuthKey_${APPLE_API_KEY}.p8"
-          echo "APPLE_API_KEY_PATH=$RUNNER_TEMP/private_keys/AuthKey_${APPLE_API_KEY}.p8" >> "$GITHUB_ENV"
-
-      - name: Build Tauri app
+      - name: Build Tauri app (Windows x64)
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
-          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
-          APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          projectPath: ./apps/desktop
-          tagName: ${{ github.ref_name }}
+          projectPath: ./AiDocPlus/apps/desktop
+          tagName: ${{ steps.version.outputs.tag }}
           releaseName: 'AiDocPlus __VERSION__'
           releaseBody: |
             ## AiDocPlus __VERSION__
 
             ### 下载
-            - **macOS (Apple Silicon)**: .dmg 文件
-            - **Windows (x64)**: .exe 安装程序（兼容 ARM64 设备）
+            - **Windows (x64)**: .exe 安装程序（NSIS）
 
             ### 更新说明
             请查看 CHANGELOG.md 获取详细更新内容。
           releaseDraft: true
           prerelease: false
-          args: ${{ matrix.args }}
+          args: --target x86_64-pc-windows-msvc

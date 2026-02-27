@@ -18,6 +18,7 @@ rsync -av --delete \
   --exclude='node_modules' \
   --exclude='.git' \
   --exclude='.github' \
+  --exclude='.gitignore' \
   --exclude='.turbo' \
   --exclude='target' \
   --exclude='.DS_Store' \
