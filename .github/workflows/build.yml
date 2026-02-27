@@ -70,6 +70,11 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
@@ -127,6 +132,13 @@ jobs:
           done
 
           echo "=== 部署完成 ==="
+
+      - name: Build resource repositories
+        shell: bash
+        run: |
+          bash ./prompt-templates-repo/scripts/build.sh
+          bash ./doc-templates-repo/scripts/build.sh
+          bash ./ai-providers-repo/scripts/build.sh
 
       - name: Sync generated resource types
         shell: bash
